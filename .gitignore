@@ -1,4 +1,10 @@
 node_modules/
 dist/
 .env
+.env.local
+.env.*.local
+.data/
+*.sqlite
 .DS_Store
+.next/
+.next-cache/

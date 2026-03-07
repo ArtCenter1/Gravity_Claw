@@ -1,0 +1,523 @@
+/* Mission Control - Dark Mode Design System */
+
+/* ============================================
+   CSS CUSTOM PROPERTIES (DESIGN TOKENS)
+   ============================================ */
+
+/* Elevations - Dark mode uses lightness for depth */
+:root {
+    /* Backgrounds */
+    --bg-sidebar: #0D0D0D;
+    --bg-page: #121212;
+    --bg-card: #1E1E1E;
+    --bg-elevated: #2A2A2A;
+    --bg-hover: #252525;
+    --bg-input: #1A1A1A;
+
+    /* Borders */
+    --border-subtle: rgba(255, 255, 255, 0.06);
+    --border-default: rgba(255, 255, 255, 0.1);
+    --border-hover: rgba(255, 255, 255, 0.15);
+
+    /* Text Hierarchy - Opacity based */
+    --text-primary: rgba(255, 255, 255, 0.87);
+    --text-secondary: rgba(255, 255, 255, 0.60);
+    --text-muted: rgba(255, 255, 255, 0.38);
+    --text-disabled: rgba(255, 255, 255, 0.25);
+
+    /* Brand Colors */
+    --brand-orange: #E5850F;
+    --brand-blue: #5A9CF5;
+    --brand-green: #2ECC8F;
+    --brand-red: #D95555;
+
+    /* Brand Colors - Subtle variants */
+    --brand-orange-dim: rgba(229, 133, 15, 0.15);
+    --brand-blue-dim: rgba(90, 156, 245, 0.15);
+    --brand-green-dim: rgba(46, 204, 143, 0.15);
+    --brand-red-dim: rgba(217, 85, 85, 0.15);
+
+    /* Gradients */
+    --gradient-orange: linear-gradient(135deg, #E5850F 0%, #F59E0B 100%);
+    --gradient-blue: linear-gradient(135deg, #5A9CF5 0%, #3B82F6 100%);
+    --gradient-green: linear-gradient(135deg, #2ECC8F 0%, #10B981 100%);
+    --gradient-red: linear-gradient(135deg, #D95555 0%, #EF4444 100%);
+
+    /* Spacing */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+
+    /* Border Radius */
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-normal: 250ms ease;
+    --transition-slow: 400ms ease;
+
+    /* Sidebar */
+    --sidebar-width: 260px;
+}
+
+/* ============================================
+   RESET & BASE STYLES
+   ============================================ */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--text-primary);
+}
+
+h1 {
+    font-size: 2rem;
+}
+
+h2 {
+    font-size: 1.5rem;
+}
+
+h3 {
+    font-size: 1.25rem;
+}
+
+h4 {
+    font-size: 1rem;
+}
+
+p {
+    color: var(--text-secondary);
+}
+
+a {
+    color: var(--brand-blue);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--text-primary);
+}
+
+/* ============================================
+   FADE-IN ANIMATIONS
+   ============================================ */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn var(--transition-normal) ease forwards;
+}
+
+.fade-in-delay-1 {
+    animation-delay: 50ms;
+}
+
+.fade-in-delay-2 {
+    animation-delay: 100ms;
+}
+
+.fade-in-delay-3 {
+    animation-delay: 150ms;
+}
+
+.fade-in-delay-4 {
+    animation-delay: 200ms;
+}
+
+.fade-in-delay-5 {
+    animation-delay: 250ms;
+}
+
+.fade-in-delay-6 {
+    animation-delay: 300ms;
+}
+
+/* ============================================
+   COMPONENT STYLES
+   ============================================ */
+
+/* Cards */
+.card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.card:hover {
+    border-color: var(--border-hover);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-md);
+}
+
+.card-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Stat Cards */
+.stat-card {
+    position: relative;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-orange);
+}
+
+.stat-card.blue::before {
+    background: var(--gradient-blue);
+}
+
+.stat-card.green::before {
+    background: var(--gradient-green);
+}
+
+.stat-card.red::before {
+    background: var(--gradient-red);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-top: var(--space-xs);
+}
+
+.stat-badge {
+    position: absolute;
+    top: var(--space-md);
+    right: var(--space-md);
+    background-color: var(--brand-green-dim);
+    color: var(--brand-green);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-primary {
+    background-color: var(--brand-orange);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #D0780D;
+}
+
+.btn-secondary {
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border-default);
+}
+
+.btn-secondary:hover {
+    background-color: var(--bg-hover);
+    border-color: var(--border-hover);
+}
+
+.btn-ghost {
+    background-color: transparent;
+    color: var(--text-secondary);
+}
+
+.btn-ghost:hover {
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+}
+
+/* Form Elements */
+.input,
+.textarea,
+.select {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.875rem;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    transition: border-color var(--transition-fast);
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+    outline: none;
+    border-color: var(--brand-orange);
+}
+
+.input::placeholder,
+.textarea::placeholder {
+    color: var(--text-disabled);
+}
+
+.textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Status Badges */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 999px;
+}
+
+.badge-success {
+    background-color: var(--brand-green-dim);
+    color: var(--brand-green);
+}
+
+.badge-error {
+    background-color: var(--brand-red-dim);
+    color: var(--brand-red);
+}
+
+.badge-info {
+    background-color: var(--brand-blue-dim);
+    color: var(--brand-blue);
+}
+
+/* Status Dot */
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--brand-green);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.status-dot.inactive {
+    background-color: var(--brand-red);
+    animation: none;
+}
+
+/* Progress Bar */
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background-color: var(--bg-elevated);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: var(--gradient-orange);
+    border-radius: 999px;
+    transition: width var(--transition-slow);
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: var(--space-xs);
+    background-color: var(--bg-card);
+    padding: var(--space-xs);
+    border-radius: var(--radius-md);
+}
+
+.tab {
+    flex: 1;
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background-color: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.tab:hover {
+    color: var(--text-secondary);
+}
+
+.tab.active {
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+}
+
+/* Grid Layouts */
+.grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+}
+
+.grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+}
+
+/* Page Container */
+.page {
+    padding: var(--space-xl);
+}
+
+.page-header {
+    margin-bottom: var(--space-xl);
+}
+
+.page-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.page-subtitle {
+    color: var(--text-muted);
+    margin-top: var(--space-xs);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: var(--space-2xl);
+    color: var(--text-muted);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-card);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bg-elevated);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--bg-hover);
+}
