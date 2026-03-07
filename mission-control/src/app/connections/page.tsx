@@ -11,15 +11,7 @@ interface Connection {
     badge?: string;
 }
 
-const iconMap: Record<string, any> = {
-    telegram: MessageSquare,
-    supabase: Database,
-    gemini: Brain,
-    openrouter: Brain,
-    groq: Brain,
-    clickup: Key,
-    youtube: Plug
-};
+const iconMap:Record<string,any>={telegram:MessageSquare,supabase:Database,gemini:Brain,openrouter:Brain,groq:Brain,brave:Database,cartesia:Key,clickup:Key,youtube:Plug};
 
 export default function ConnectionsPage() {
     const [conns, setConns] = useState<Connection[]>([]);

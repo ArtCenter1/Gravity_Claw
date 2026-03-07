@@ -11,7 +11,8 @@ export const bot = new Bot(config.telegramBotToken);
 
 bot.use(async (ctx, next) => {
     if (ctx.from?.id !== config.telegramAllowedUserId) {
-        console.warn(`Unauthorized access attempt from user ID: ${ctx.from?.id}`);
+        console.warn(`[Security] Unauthorized access attempt from user ID: ${ctx.from?.id}. Expected: ${config.telegramAllowedUserId}`);
+        await ctx.reply(`Unauthorized. Your ID: ${ctx.from?.id}`);
         return;
     }
     await next();

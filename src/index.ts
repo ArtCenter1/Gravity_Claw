@@ -32,14 +32,25 @@ async function main() {
     console.log('[SQLite] Local memory store initialized');
 
     // Initialize MCP Servers
-    await initializeMCPServers();
+    try {
+        console.log('[System] Initializing MCP Servers...');
+        await initializeMCPServers();
+    } catch (e) {
+        console.error('[System] MCP Initialization failed (non-fatal):', e);
+    }
 
     // Start Heartbeat Service (Cron Jobs)
-    setupHeartbeat();
+    try {
+        console.log('[System] Starting Heartbeat Service...');
+        setupHeartbeat();
+    } catch (e) {
+        console.error('[System] Heartbeat Service failed (non-fatal):', e);
+    }
 
+    console.log('[System] Connecting to Telegram...');
     await bot.start({
         onStart: (botInfo: any) => {
-            console.log(`[Bot] Started as @${botInfo.username}`);
+            console.log(`[Bot] SUCCESS: Started as @${botInfo.username}`);
         },
     });
 }
