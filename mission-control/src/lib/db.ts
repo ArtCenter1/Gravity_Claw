@@ -39,6 +39,11 @@ export interface CoreFact {
     category: string;
     created_at: string;
     updated_at: string;
+    // URL metadata fields
+    metadata_title?: string;
+    metadata_thumbnail?: string;
+    metadata_channel?: string;
+    metadata_video_id?: string;
 }
 
 export interface Setting {
@@ -126,18 +131,22 @@ export function getFactCount(): number {
     }
 }
 
-export function saveFact(id: string, fact: string, type: string = 'note', category: string = 'general'): void {
+export function saveFact(id: string, fact: string, type: string = 'note', category: string = 'general', metadata?: { title?: string; thumbnail?: string; channel?: string; videoId?: string }): void {
     try {
         const stmt = db.prepare(`
-      INSERT INTO core_facts (id, fact, type, category, updated_at)
-      VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+      INSERT INTO core_facts (id, fact, type, category, metadata_title, metadata_thumbnail, metadata_channel, metadata_video_id, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
       ON CONFLICT(id) DO UPDATE SET 
         fact = excluded.fact, 
         type = excluded.type, 
         category = excluded.category, 
+        metadata_title = COALESCE(excluded.metadata_title, core_facts.metadata_title),
+        metadata_thumbnail = COALESCE(excluded.metadata_thumbnail, core_facts.metadata_thumbnail),
+        metadata_channel = COALESCE(excluded.metadata_channel, core_facts.metadata_channel),
+        metadata_video_id = COALESCE(excluded.metadata_video_id, core_facts.metadata_video_id),
         updated_at = CURRENT_TIMESTAMP
     `);
-        stmt.run(id, fact, type, category);
+        stmt.run(id, fact, type, category, metadata?.title || null, metadata?.thumbnail || null, metadata?.channel || null, metadata?.videoId || null);
     } catch (error) {
         console.error('Failed to save fact:', error);
     }

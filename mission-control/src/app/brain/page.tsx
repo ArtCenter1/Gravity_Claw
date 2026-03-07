@@ -9,6 +9,12 @@ interface Memory {
     category: string;
     type: 'note' | 'url' | 'file';
     createdAt: string;
+    metadata?: {
+        title: string;
+        thumbnail: string;
+        channel?: string;
+        videoId?: string;
+    };
 }
 
 export default function BrainPage() {
@@ -251,31 +257,126 @@ export default function BrainPage() {
                                             borderLeft: `3px solid ${getTypeColor(memory.type)}`,
                                         }}
                                     >
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-xs)' }}>
-                                                <TypeIcon size={14} color={getTypeColor(memory.type)} />
-                                                <span className="badge" style={{
-                                                    backgroundColor: `${getTypeColor(memory.type)}20`,
-                                                    color: getTypeColor(memory.type),
-                                                    fontSize: '0.625rem',
-                                                }}>
-                                                    {memory.type}
-                                                </span>
-                                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                                                    <Tag size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                                                    {memory.category}
-                                                </span>
+                                        {/* URL with metadata - show thumbnail card */}
+                                        {memory.type === 'url' && memory.metadata?.thumbnail ? (
+                                            <div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-xs)' }}>
+                                                    <TypeIcon size={14} color={getTypeColor(memory.type)} />
+                                                    <span className="badge" style={{
+                                                        backgroundColor: `${getTypeColor(memory.type)}20`,
+                                                        color: getTypeColor(memory.type),
+                                                        fontSize: '0.625rem',
+                                                    }}>
+                                                        {memory.type}
+                                                    </span>
+                                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                                        <Tag size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                                                        {memory.category}
+                                                    </span>
+                                                    <button
+                                                        onClick={() => handleDeleteMemory(memory.id)}
+                                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', marginLeft: 'auto' }}
+                                                    >
+                                                        <X size={14} />
+                                                    </button>
+                                                </div>
+                                                {/* YouTube video card */}
+                                                <a
+                                                    href={memory.content}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{ textDecoration: 'none', color: 'inherit' }}
+                                                >
+                                                    <div style={{
+                                                        display: 'flex',
+                                                        gap: 'var(--space-sm)',
+                                                        marginTop: 'var(--space-xs)',
+                                                        padding: 'var(--space-sm)',
+                                                        backgroundColor: 'var(--bg-hover)',
+                                                        borderRadius: 'var(--radius-sm)',
+                                                    }}>
+                                                        <img
+                                                            src={memory.metadata.thumbnail}
+                                                            alt={memory.metadata.title}
+                                                            style={{
+                                                                width: '120px',
+                                                                height: '68px',
+                                                                objectFit: 'cover',
+                                                                borderRadius: 'var(--radius-sm)'
+                                                            }}
+                                                        />
+                                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                                            <p style={{
+                                                                color: 'var(--text-primary)',
+                                                                fontSize: '0.875rem',
+                                                                fontWeight: 500,
+                                                                margin: 0,
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                                display: '-webkit-box',
+                                                                WebkitLineClamp: 2,
+                                                                WebkitBoxOrient: 'vertical'
+                                                            }}>
+                                                                {memory.metadata.title}
+                                                            </p>
+                                                            {memory.metadata.channel && (
+                                                                <p style={{
+                                                                    color: 'var(--text-muted)',
+                                                                    fontSize: '0.75rem',
+                                                                    margin: '4px 0 0 0'
+                                                                }}>
+                                                                    {memory.metadata.channel}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </a>
                                             </div>
-                                            <button
-                                                onClick={() => handleDeleteMemory(memory.id)}
-                                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
-                                            >
-                                                <X size={14} />
-                                            </button>
-                                        </div>
-                                        <p style={{ color: 'var(--text-primary)', fontSize: '0.875rem' }}>
-                                            {memory.content}
-                                        </p>
+                                        ) : (
+                                            /* Regular URL or note - show simple card */
+                                            <div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-xs)' }}>
+                                                        <TypeIcon size={14} color={getTypeColor(memory.type)} />
+                                                        <span className="badge" style={{
+                                                            backgroundColor: `${getTypeColor(memory.type)}20`,
+                                                            color: getTypeColor(memory.type),
+                                                            fontSize: '0.625rem',
+                                                        }}>
+                                                            {memory.type}
+                                                        </span>
+                                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                                            <Tag size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                                                            {memory.category}
+                                                        </span>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleDeleteMemory(memory.id)}
+                                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+                                                    >
+                                                        <X size={14} />
+                                                    </button>
+                                                </div>
+                                                {memory.type === 'url' ? (
+                                                    <a
+                                                        href={memory.content}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        style={{
+                                                            color: 'var(--brand-blue)',
+                                                            fontSize: '0.875rem',
+                                                            wordBreak: 'break-all'
+                                                        }}
+                                                    >
+                                                        {memory.content}
+                                                    </a>
+                                                ) : (
+                                                    <p style={{ color: 'var(--text-primary)', fontSize: '0.875rem' }}>
+                                                        {memory.content}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 'var(--space-sm)' }}>
                                             <Clock size={12} color="var(--text-disabled)" />
                                             <span style={{ fontSize: '0.75rem', color: 'var(--text-disabled)' }}>

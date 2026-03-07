@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAllFacts, getFactCount, saveFact, deleteFact } from '@/lib/db';
+import { isYouTubeUrl, fetchYouTubeMetadata } from '@/lib/youtube-metadata';
 
 export async function GET() {
     try {
@@ -14,6 +15,13 @@ export async function GET() {
             type: (fact.type as 'note' | 'url' | 'file') || 'note',
             createdAt: fact.created_at,
             updatedAt: fact.updated_at,
+            // Include URL metadata if available
+            metadata: fact.metadata_title ? {
+                title: fact.metadata_title,
+                thumbnail: fact.metadata_thumbnail,
+                channel: fact.metadata_channel,
+                videoId: fact.metadata_video_id
+            } : undefined
         }));
 
         return NextResponse.json({
@@ -34,7 +42,22 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing id or fact' }, { status: 400 });
         }
 
-        saveFact(id, fact, type || 'note', category || 'general');
+        // If it's a URL, try to fetch metadata
+        let metadata;
+        if (type === 'url' && isYouTubeUrl(fact)) {
+            try {
+                metadata = await fetchYouTubeMetadata(fact);
+            } catch (error) {
+                console.error('Failed to fetch YouTube metadata:', error);
+            }
+        }
+
+        saveFact(id, fact, type || 'note', category || 'general', metadata ? {
+            title: metadata.title,
+            thumbnail: metadata.thumbnail,
+            channel: metadata.channelName,
+            videoId: metadata.videoId
+        } : undefined);
 
         return NextResponse.json({ success: true });
     } catch (error) {
