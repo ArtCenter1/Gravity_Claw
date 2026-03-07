@@ -35,6 +35,8 @@ export interface MessageLog {
 export interface CoreFact {
     id: string;
     fact: string;
+    type: string;
+    category: string;
     created_at: string;
     updated_at: string;
 }
@@ -124,14 +126,18 @@ export function getFactCount(): number {
     }
 }
 
-export function saveFact(id: string, fact: string): void {
+export function saveFact(id: string, fact: string, type: string = 'note', category: string = 'general'): void {
     try {
         const stmt = db.prepare(`
-      INSERT INTO core_facts (id, fact, updated_at)
-      VALUES (?, ?, CURRENT_TIMESTAMP)
-      ON CONFLICT(id) DO UPDATE SET fact = excluded.fact, updated_at = CURRENT_TIMESTAMP
+      INSERT INTO core_facts (id, fact, type, category, updated_at)
+      VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(id) DO UPDATE SET 
+        fact = excluded.fact, 
+        type = excluded.type, 
+        category = excluded.category, 
+        updated_at = CURRENT_TIMESTAMP
     `);
-        stmt.run(id, fact);
+        stmt.run(id, fact, type, category);
     } catch (error) {
         console.error('Failed to save fact:', error);
     }

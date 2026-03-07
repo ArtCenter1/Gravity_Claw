@@ -14,6 +14,8 @@ db.exec(`
     CREATE TABLE IF NOT EXISTS core_facts (
         id TEXT PRIMARY KEY,
         fact TEXT NOT NULL,
+        type TEXT DEFAULT 'note',
+        category TEXT DEFAULT 'general',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
@@ -57,3 +59,7 @@ db.exec(`
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 `);
+
+// Migration: Add columns if they don't exist
+try { db.exec("ALTER TABLE core_facts ADD COLUMN type TEXT DEFAULT 'note'"); } catch (e) { }
+try { db.exec("ALTER TABLE core_facts ADD COLUMN category TEXT DEFAULT 'general'"); } catch (e) { }

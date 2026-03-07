@@ -10,8 +10,8 @@ export async function GET() {
         const formattedFacts = facts.map(fact => ({
             id: fact.id,
             content: fact.fact,
-            category: extractCategory(fact.fact),
-            type: 'note' as const,
+            category: fact.category || extractCategory(fact.fact),
+            type: (fact.type as 'note' | 'url' | 'file') || 'note',
             createdAt: fact.created_at,
             updatedAt: fact.updated_at,
         }));
@@ -28,13 +28,13 @@ export async function GET() {
 
 export async function POST(request: Request) {
     try {
-        const { id, fact } = await request.json();
+        const { id, fact, type, category } = await request.json();
 
         if (!id || !fact) {
             return NextResponse.json({ error: 'Missing id or fact' }, { status: 400 });
         }
 
-        saveFact(id, fact);
+        saveFact(id, fact, type || 'note', category || 'general');
 
         return NextResponse.json({ success: true });
     } catch (error) {

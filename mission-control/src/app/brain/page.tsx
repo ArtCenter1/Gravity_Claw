@@ -71,7 +71,12 @@ export default function BrainPage() {
             await fetch('/api/facts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, fact: newContent }),
+                body: JSON.stringify({
+                    id,
+                    fact: newContent,
+                    type: activeTab,
+                    category: newCategory || (activeTab === 'url' ? 'links' : 'general')
+                }),
             });
 
             setNewContent('');
