@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CheckSquare, Circle, CheckCircle, Bot, User, Clock, ArrowRight, Loader2 } from 'lucide-react';
+import { CheckSquare, Circle, CheckCircle, Bot, User, Clock, ArrowRight, Loader2, MessageSquare } from 'lucide-react';
 
 interface Task {
     id: number;
@@ -33,7 +33,10 @@ export default function TasksPage() {
     }, []);
 
     const formatTime = (timeStr: string) => {
+        if (!timeStr) return '';
         const date = new Date(timeStr);
+        if (isNaN(date.getTime())) return timeStr; // Fallback to raw string if not parseable
+
         const now = new Date();
         const diff = now.getTime() - date.getTime();
         const hours = Math.floor(diff / (1000 * 60 * 60));
@@ -111,7 +114,7 @@ export default function TasksPage() {
                                     </span>
                                 </div>
                                 <p style={{ color: 'var(--text-primary)', fontSize: '0.875rem' }}>
-                                    {task.content.length > 150 ? task.content.substring(0, 150) + '...' : task.content}
+                                    {task.content ? (task.content.length > 150 ? task.content.substring(0, 150) + '...' : task.content) : ''}
                                 </p>
                             </div>
                         ))}

@@ -29,6 +29,10 @@ export async function GET(request: Request) {
             description: msg.content.substring(0, 100) + (msg.content.length > 100 ? '...' : ''),
             time: formatTimeAgo(msg.timestamp),
             icon: msg.role === 'user' ? 'user' : 'bot',
+            // Raw fields for Tasks page
+            role: msg.role,
+            content: msg.content,
+            timestamp: new Date(msg.timestamp).toISOString(),
         }));
 
         return NextResponse.json({

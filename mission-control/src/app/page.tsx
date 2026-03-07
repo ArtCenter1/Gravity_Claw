@@ -29,28 +29,42 @@ interface Stats {
     uptime: string;
 }
 
+interface Config {
+    llm_provider: string;
+    heartbeat_morning_cron?: string;
+    heartbeat_afternoon_cron?: string;
+    max_messages?: string;
+}
+
 export default function CommandCenter() {
     const [activity, setActivity] = useState<ActivityItem[]>([]);
     const [stats, setStats] = useState<Stats>({ totalMessages: 0, todayMessages: 0, toolCalls: 0, uptime: '0h' });
+    const [config, setConfig] = useState<Config>({ llm_provider: 'gemini' });
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        async function fetchActivity() {
-            try {
-                const res = await fetch('/api/activity?limit=10');
-                const data = await res.json();
-                setActivity(data.messages || []);
-                setStats(data.stats || { totalMessages: 0, todayMessages: 0, toolCalls: 0, uptime: '0h' });
-            } catch (error) {
-                console.error('Failed to fetch activity:', error);
-            } finally {
-                setLoading(false);
-            }
-        }
+    const fetchData = async () => {
+        try {
+            // Fetch Activity & Stats
+            const activityRes = await fetch('/api/activity?limit=10');
+            const activityData = await activityRes.json();
+            setActivity(activityData.messages || []);
+            setStats(activityData.stats || { totalMessages: 0, todayMessages: 0, toolCalls: 0, uptime: '0h' });
 
-        fetchActivity();
+            // Fetch Config
+            const settingsRes = await fetch('/api/settings');
+            const settingsData = await settingsRes.json();
+            setConfig(settingsData.settings || { llm_provider: 'gemini' });
+        } catch (error) {
+            console.error('Failed to fetch data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
         // Refresh every 30 seconds
-        const interval = setInterval(fetchActivity, 30000);
+        const interval = setInterval(fetchData, 30000);
         return () => clearInterval(interval);
     }, []);
 
@@ -150,10 +164,10 @@ export default function CommandCenter() {
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-                            <ConfigItem label="Model" value="gemini-2.0-flash-exp" />
-                            <ConfigItem label="Provider" value="Google Gemini" />
+                            <ConfigItem label="Model" value={config.llm_provider === 'gemini' ? 'gemini-2.0-flash' : config.llm_provider || 'Unknown'} />
+                            <ConfigItem label="Provider" value={config.llm_provider || 'Not Set'} />
                             <ConfigItem label="Memory Stack" value="SQLite + Supabase" />
-                            <ConfigItem label="Heartbeat" value="Every 5 minutes" />
+                            <ConfigItem label="Heartbeat" value={config.heartbeat_morning_cron ? 'Custom' : 'Every 5 minutes'} />
                             <ConfigItem label="Content Sync" value="Not configured" />
                         </div>
                     </div>

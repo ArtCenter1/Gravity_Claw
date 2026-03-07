@@ -2,8 +2,8 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 
-// Connect to the SQLite database - use absolute path
-const DB_PATH = path.resolve('d:', 'My_Projects', 'Gravity_Claw', '.data', 'gravity_claw.sqlite');
+// Connect to the SQLite database - use a reliable absolute path
+const DB_PATH = path.join(process.cwd(), '..', '.data', 'gravity_claw.sqlite');
 
 let db: Database.Database;
 
@@ -12,8 +12,9 @@ try {
     if (fs.existsSync(DB_PATH)) {
         db = new Database(DB_PATH);
         db.pragma('journal_mode = WAL');
+        console.log('Successfully connected to database at:', DB_PATH);
     } else {
-        console.log('Database not found at:', DB_PATH);
+        console.warn('Database NOT found at:', DB_PATH, '- falling back to in-memory');
         db = new Database(':memory:');
     }
 } catch (error) {
@@ -51,12 +52,32 @@ export interface RollingSummary {
     updated_at: string;
 }
 
+export interface Todo {
+    id: string;
+    text: string;
+    completed: number;
+    updated_at: string;
+}
+
+export interface HabitLog {
+    day_index: number;
+    status: string;
+    updated_at: string;
+}
+
+export interface ProductivityNote {
+    id: string;
+    content: string;
+    updated_at: string;
+}
+
 // Queries
 export function getMessages(limit: number = 50): MessageLog[] {
     try {
         const stmt = db.prepare('SELECT * FROM message_log ORDER BY timestamp DESC LIMIT ?');
         return stmt.all(limit) as MessageLog[];
-    } catch {
+    } catch (error) {
+        console.error('getMessages error:', error);
         return [];
     }
 }
@@ -163,5 +184,71 @@ export function getRollingSummary(): RollingSummary | null {
         return stmt.get() as RollingSummary | null;
     } catch {
         return null;
+    }
+}
+
+// Productivity Queries
+export function getTodos(): Todo[] {
+    try {
+        return db.prepare('SELECT * FROM todos ORDER BY updated_at DESC').all() as Todo[];
+    } catch (error) {
+        console.error('getTodos error:', error);
+        return [];
+    }
+}
+
+export function saveTodo(todo: { id: string; text: string; completed: number }): void {
+    try {
+        db.prepare('INSERT INTO todos (id, text, completed, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP) ON CONFLICT(id) DO UPDATE SET text=excluded.text, completed=excluded.completed, updated_at=CURRENT_TIMESTAMP').run(todo.id, todo.text, todo.completed);
+    } catch (error) {
+        console.error('Failed to save todo:', error);
+    }
+}
+
+export function deleteTodo(id: string): void {
+    try {
+        db.prepare('DELETE FROM todos WHERE id = ?').run(id);
+    } catch (error) {
+        console.error('Failed to delete todo:', error);
+    }
+}
+
+export function getHabits(): HabitLog[] {
+    try {
+        return db.prepare('SELECT * FROM habit_logs').all() as HabitLog[];
+    } catch {
+        return [];
+    }
+}
+
+export function saveHabit(day_index: number, status: string): void {
+    try {
+        db.prepare('INSERT INTO habit_logs (day_index, status, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP) ON CONFLICT(day_index) DO UPDATE SET status=excluded.status, updated_at=CURRENT_TIMESTAMP').run(day_index, status);
+    } catch (error) {
+        console.error('Failed to save habit:', error);
+    }
+}
+
+export function getProductivityNotes(): ProductivityNote[] {
+    try {
+        return db.prepare('SELECT * FROM productivity_notes ORDER BY updated_at DESC').all() as ProductivityNote[];
+    } catch {
+        return [];
+    }
+}
+
+export function saveProductivityNote(id: string, content: string): void {
+    try {
+        db.prepare('INSERT INTO productivity_notes (id, content, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP) ON CONFLICT(id) DO UPDATE SET content=excluded.content, updated_at=CURRENT_TIMESTAMP').run(id, content);
+    } catch (error) {
+        console.error('Failed to save note:', error);
+    }
+}
+
+export function deleteProductivityNote(id: string): void {
+    try {
+        db.prepare('DELETE FROM productivity_notes WHERE id = ?').run(id);
+    } catch (error) {
+        console.error('Failed to delete productivity note:', error);
     }
 }

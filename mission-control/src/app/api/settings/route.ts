@@ -8,11 +8,13 @@ export async function GET() {
         const settings = getSettings();
 
         // Read soul.md for personality
-        const soulPath = path.resolve('d:', 'My_Projects', 'Gravity_Claw', 'src', 'soul.md');
+        const soulPath = path.join(process.cwd(), '..', 'src', 'soul.md');
         let soulContent = '';
         try {
+            console.log('Reading personality from:', soulPath);
             soulContent = fs.readFileSync(soulPath, 'utf-8');
-        } catch {
+        } catch (err) {
+            console.error('Failed to read soul.md:', err);
             soulContent = 'Personality not configured yet.';
         }
 
@@ -38,7 +40,7 @@ export async function POST(request: Request) {
 
         if (type === 'personality') {
             // Save personality to soul.md
-            const soulPath = path.resolve('d:', 'My_Projects', 'Gravity_Claw', 'src', 'soul.md');
+            const soulPath = path.join(process.cwd(), '..', 'src', 'soul.md');
             fs.writeFileSync(soulPath, value);
             return NextResponse.json({ success: true });
         }

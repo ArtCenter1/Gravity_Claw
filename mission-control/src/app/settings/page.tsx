@@ -47,11 +47,11 @@ export default function SettingsPage() {
 
     const configItems = [
         { icon: Bot, label: 'LLM Provider', value: settings.llm_provider || 'gemini', category: 'Model' },
-        { icon: Key, label: 'API Key', value: '••••••••••••••', category: 'Model' },
-        { icon: Clock, label: 'Heartbeat Interval', value: settings.heartbeat_interval || '5 minutes', category: 'Schedule' },
-        { icon: Clock, label: 'Content Sync Interval', value: settings.content_sync_interval || '1 hour', category: 'Schedule' },
+        { icon: Bot, label: 'Max Output Tokens', value: settings.max_output_tokens || '4096', category: 'Model' },
+        { icon: Clock, label: 'Heartbeat (Morning)', value: settings.heartbeat_morning_cron || '0 9 * * *', category: 'Schedule' },
+        { icon: Clock, label: 'Heartbeat (Afternoon)', value: settings.heartbeat_afternoon_cron || '0 15 * * *', category: 'Schedule' },
         { icon: Database, label: 'Memory Type', value: 'SQLite + Supabase', category: 'Storage' },
-        { icon: Database, label: 'Max Messages', value: settings.max_messages || '1000', category: 'Storage' },
+        { icon: Database, label: 'Max History Messages', value: settings.max_messages || '100', category: 'Storage' },
     ];
 
     const groupedConfig = configItems.reduce((acc, item) => {
@@ -108,7 +108,7 @@ export default function SettingsPage() {
                     className="textarea"
                     value={personality}
                     onChange={(e) => setPersonality(e.target.value)}
-                    style={{ minHeight: 300, fontFamily: 'monospace', fontSize: '0.875rem' }}
+                    style={{ minHeight: 400, fontFamily: 'monospace', fontSize: '0.875rem', lineHeight: '1.6' }}
                 />
             </div>
 
@@ -131,7 +131,6 @@ export default function SettingsPage() {
                                         padding: 'var(--space-sm) var(--space-md)',
                                         backgroundColor: 'var(--bg-input)',
                                         borderRadius: 'var(--radius-md)',
-                                        cursor: 'pointer',
                                         transition: 'background-color var(--transition-fast)',
                                     }}
                                 >

@@ -1,75 +1,56 @@
 'use client';
 
-import { useState } from 'react';
-import { Plug, X, CheckCircle, XCircle, MessageSquare, Database, Brain, Key } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plug, X, CheckCircle, XCircle, MessageSquare, Database, Brain, Key, Loader2 } from 'lucide-react';
 
 interface Connection {
     id: string;
     name: string;
     description: string;
-    icon: any;
     status: 'active' | 'inactive';
     badge?: string;
 }
 
-const connections: Connection[] = [
-    {
-        id: 'telegram',
-        name: 'Telegram',
-        description: 'Primary communication channel',
-        icon: MessageSquare,
-        status: 'active'
-    },
-    {
-        id: 'supabase',
-        name: 'Supabase',
-        description: 'Semantic memory & real-time data',
-        icon: Database,
-        status: 'active'
-    },
-    {
-        id: 'gemini',
-        name: 'Google Gemini',
-        description: 'LLM provider for AI responses',
-        icon: Brain,
-        status: 'active'
-    },
-    {
-        id: 'openrouter',
-        name: 'OpenRouter',
-        description: 'Alternative LLM provider',
-        icon: Brain,
-        status: 'inactive'
-    },
-    {
-        id: 'clickup',
-        name: 'ClickUp',
-        description: 'Task management integration',
-        icon: Key,
-        status: 'inactive'
-    },
-    {
-        id: 'youtube',
-        name: 'YouTube',
-        description: 'Content platform sync',
-        icon: Plug,
-        status: 'inactive',
-        badge: 'via Zapier'
-    },
-];
+const iconMap: Record<string, any> = {
+    telegram: MessageSquare,
+    supabase: Database,
+    gemini: Brain,
+    openrouter: Brain,
+    groq: Brain,
+    clickup: Key,
+    youtube: Plug
+};
 
 export default function ConnectionsPage() {
-    const [conns, setConns] = useState(connections);
+    const [conns, setConns] = useState<Connection[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchData = async () => {
+        try {
+            const res = await fetch('/api/connections');
+            const data = await res.json();
+            setConns(data.connections || []);
+        } catch (error) {
+            console.error('Failed to fetch connections:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
     const activeCount = conns.filter(c => c.status === 'active').length;
     const totalCount = conns.length;
 
-    const toggleConnection = (id: string) => {
-        setConns(prev => prev.map(c =>
-            c.id === id
-                ? { ...c, status: c.status === 'active' ? 'inactive' : 'active' }
-                : c
-        ));
-    };
+    if (loading) {
+        return (
+            <div className="page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+                <Loader2 size={32} className="animate-spin" style={{ color: 'var(--text-muted)' }} />
+            </div>
+        );
+    }
 
     return (
         <div className="page">
@@ -87,7 +68,7 @@ export default function ConnectionsPage() {
                 <div className="progress-bar" style={{ height: 10 }}>
                     <div
                         className="progress-bar-fill"
-                        style={{ width: `${(activeCount / totalCount) * 100}%` }}
+                        style={{ width: totalCount > 0 ? `${(activeCount / totalCount) * 100}%` : '0%' }}
                     ></div>
                 </div>
             </div>
@@ -95,7 +76,7 @@ export default function ConnectionsPage() {
             {/* Connection Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 'var(--space-md)' }}>
                 {conns.map((conn, index) => {
-                    const Icon = conn.icon;
+                    const Icon = iconMap[conn.id] || Plug;
                     const isActive = conn.status === 'active';
 
                     return (
@@ -140,42 +121,19 @@ export default function ConnectionsPage() {
                                     </div>
                                 </div>
 
-                                {isActive ? (
-                                    <button
-                                        onClick={() => toggleConnection(conn.id)}
-                                        style={{
-                                            background: 'none',
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            padding: 4,
-                                            borderRadius: 'var(--radius-sm)',
-                                            color: 'var(--text-muted)',
-                                            transition: 'all var(--transition-fast)',
-                                        }}
-                                        title="Disconnect"
-                                    >
-                                        <X size={18} />
-                                    </button>
-                                ) : (
-                                    <span className={`badge ${isActive ? 'badge-success' : 'badge-error'}`}>
-                                        {isActive ? (
-                                            <><CheckCircle size={12} /> Active</>
-                                        ) : (
-                                            <><XCircle size={12} /> Inactive</>
-                                        )}
-                                    </span>
-                                )}
+                                <span className={`badge ${isActive ? 'badge-success' : 'badge-error'}`}>
+                                    {isActive ? (
+                                        <><CheckCircle size={12} /> Active</>
+                                    ) : (
+                                        <><XCircle size={12} /> Inactive</>
+                                    )}
+                                </span>
                             </div>
 
                             {!isActive && (
-                                <button
-                                    className="btn btn-secondary"
-                                    style={{ width: '100%', marginTop: 'var(--space-md)' }}
-                                    onClick={() => toggleConnection(conn.id)}
-                                >
-                                    <Plug size={16} />
-                                    Connect
-                                </button>
+                                <div style={{ marginTop: 'var(--space-md)', fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+                                    Configure in .env to enable
+                                </div>
                             )}
                         </div>
                     );

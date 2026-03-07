@@ -37,4 +37,23 @@ db.exec(`
         value TEXT NOT NULL,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS todos (
+        id TEXT PRIMARY KEY,
+        text TEXT NOT NULL,
+        completed INTEGER DEFAULT 0,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS habit_logs (
+        day_index INTEGER PRIMARY KEY,
+        status TEXT NOT NULL, -- JSON array of booleans
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS productivity_notes (
+        id TEXT PRIMARY KEY,
+        content TEXT NOT NULL,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
 `);

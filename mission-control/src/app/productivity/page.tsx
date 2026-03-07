@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Check, Flame, Target, TrendingUp, Plus, X, FileText, Lightbulb } from 'lucide-react';
+import { Check, Flame, Target, TrendingUp, Plus, X, FileText, Lightbulb, Loader2 } from 'lucide-react';
 
 interface Todo {
     id: string;
@@ -29,96 +29,182 @@ const motivationalMessages = [
 ];
 
 export default function ProductivityPage() {
-    // Stats (mock data)
-    const daysCompleted = 45;
-    const currentStreak = 7;
-    const currentPhase = 'Growth';
-    const progress = Math.round((daysCompleted / 90) * 100);
-
-    // Habit tracker
-    const [habits, setHabits] = useState<boolean[][]>(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('habits');
-            if (saved) return JSON.parse(saved);
-        }
-        // Initialize with empty 90 days
-        return Array(90).fill(null).map(() => Array(3).fill(false));
-    });
-
-    // Todos
-    const [todos, setTodos] = useState<Todo[]>(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('todos');
-            if (saved) return JSON.parse(saved);
-        }
-        return [
-            { id: '1', text: 'Review agent performance metrics', completed: true },
-            { id: '2', text: 'Update system prompt for better context', completed: false },
-            { id: '3', text: 'Test new tool integration', completed: false },
-        ];
-    });
+    const [habits, setHabits] = useState<boolean[][]>(Array(90).fill(null).map(() => Array(3).fill(false)));
+    const [todos, setTodos] = useState<Todo[]>([]);
+    const [notes, setNotes] = useState<Note[]>([]);
     const [newTodo, setNewTodo] = useState('');
+    const [loading, setLoading] = useState(true);
 
-    // Notes
-    const [notes, setNotes] = useState<Note[]>(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('notes');
-            if (saved) return JSON.parse(saved);
+    const fetchData = async () => {
+        try {
+            const res = await fetch('/api/productivity');
+            const data = await res.json();
+            
+            // Map todos
+            setTodos(data.todos.map((t: any) => ({
+                id: t.id,
+                text: t.text,
+                completed: !!t.completed
+            })));
+
+            // Map notes
+            setNotes(data.notes.map((n: any) => ({
+                id: n.id,
+                content: n.content,
+                updatedAt: n.updated_at
+            })));
+
+            // Map habits
+            if (data.habits && data.habits.length > 0) {
+                const newHabits = Array(90).fill(null).map(() => Array(3).fill(false));
+                data.habits.forEach((h: any) => {
+                    try {
+                        newHabits[h.day_index] = JSON.parse(h.status);
+                    } catch (e) {
+                        console.error('Failed to parse habit status', e);
+                    }
+                });
+                setHabits(newHabits);
+            }
+        } catch (error) {
+            console.error('Failed to fetch productivity data:', error);
+        } finally {
+            setLoading(false);
         }
-        return [
-            { id: '1', content: 'Key insight: User prefers concise responses in the morning.', updatedAt: '2026-03-05' },
-        ];
-    });
-
-    // Save to localStorage
-    useEffect(() => {
-        localStorage.setItem('habits', JSON.stringify(habits));
-    }, [habits]);
+    };
 
     useEffect(() => {
-        localStorage.setItem('todos', JSON.stringify(todos));
-    }, [todos]);
+        fetchData();
+    }, []);
 
-    useEffect(() => {
-        localStorage.setItem('notes', JSON.stringify(notes));
-    }, [notes]);
+    const daysCompleted = habits.filter(day => day.some(h => h)).length;
+    const currentStreak = calculateStreak(habits);
+    const progress = Math.round((daysCompleted / 90) * 100);
+    const currentPhase = daysCompleted < 30 ? 'Foundation' : daysCompleted < 60 ? 'Growth' : 'Scale';
 
-    const toggleHabit = (day: number, phase: number) => {
-        setHabits(prev => {
-            const newHabits = [...prev];
-            newHabits[day] = [...newHabits[day]];
-            newHabits[day][phase] = !newHabits[day][phase];
-            return newHabits;
+    function calculateStreak(habits: boolean[][]) {
+        let streak = 0;
+        const today = new Date().getDate() - 1;
+        for (let i = today; i >= 0; i--) {
+            if (habits[i]?.some(h => h)) streak++;
+            else if (i !== today) break;
+        }
+        return streak;
+    }
+
+    const toggleHabit = async (day: number, phaseIdx: number) => {
+        const newHabitRow = [...habits[day]];
+        newHabitRow[phaseIdx] = !newHabitRow[phaseIdx];
+        
+        const newHabits = [...habits];
+        newHabits[day] = newHabitRow;
+        setHabits(newHabits);
+
+        await fetch('/api/productivity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: 'habit',
+                action: 'save',
+                data: { day_index: day, status: JSON.stringify(newHabitRow) }
+            })
         });
     };
 
-    const addTodo = () => {
+    const addTodo = async () => {
         if (!newTodo.trim()) return;
-        setTodos(prev => [...prev, { id: Date.now().toString(), text: newTodo, completed: false }]);
+        const todo = { id: Date.now().toString(), text: newTodo, completed: 0 };
+        setTodos(prev => [{ ...todo, completed: false }, ...prev]);
         setNewTodo('');
+
+        await fetch('/api/productivity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: 'todo',
+                action: 'save',
+                data: todo
+            })
+        });
+        fetchData();
     };
 
-    const toggleTodo = (id: string) => {
-        setTodos(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+    const toggleTodo = async (id: string) => {
+        const todo = todos.find(t => t.id === id);
+        if (!todo) return;
+        
+        const updatedTodo = { ...todo, completed: !todo.completed };
+        setTodos(prev => prev.map(t => t.id === id ? updatedTodo : t));
+
+        await fetch('/api/productivity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: 'todo',
+                action: 'save',
+                data: { ...updatedTodo, completed: updatedTodo.completed ? 1 : 0 }
+            })
+        });
     };
 
-    const deleteTodo = (id: string) => {
+    const deleteTodo = async (id: string) => {
         setTodos(prev => prev.filter(t => t.id !== id));
+        await fetch('/api/productivity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: 'todo',
+                action: 'delete',
+                data: { id }
+            })
+        });
     };
 
-    const addNote = () => {
-        setNotes(prev => [...prev, { id: Date.now().toString(), content: '', updatedAt: new Date().toISOString().split('T')[0] }]);
+    const addNote = async () => {
+        const id = Date.now().toString();
+        const note = { id, content: '', updatedAt: new Date().toISOString() };
+        setNotes(prev => [note, ...prev]);
+
+        await fetch('/api/productivity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: 'note',
+                action: 'save',
+                data: { id, content: '' }
+            })
+        });
     };
 
-    const updateNote = (id: string, content: string) => {
-        setNotes(prev => prev.map(n => n.id === id ? { ...n, content, updatedAt: new Date().toISOString().split('T')[0] } : n));
+    const updateNote = async (id: string, content: string) => {
+        setNotes(prev => prev.map(n => n.id === id ? { ...n, content, updatedAt: new Date().toISOString() } : n));
+        
+        // Debounce or just save
+        await fetch('/api/productivity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: 'note',
+                action: 'save',
+                data: { id, content }
+            })
+        });
     };
 
-    const deleteNote = (id: string) => {
+    const deleteNote = async (id: string) => {
         setNotes(prev => prev.filter(n => n.id !== id));
+        await fetch('/api/productivity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: 'note',
+                action: 'delete',
+                data: { id }
+            })
+        });
     };
 
-    const getPhase = (day: number) => {
+    const getPhaseParams = (day: number) => {
         if (day < 30) return { name: 'Foundation', color: 'var(--brand-blue)' };
         if (day < 60) return { name: 'Growth', color: 'var(--brand-green)' };
         return { name: 'Scale', color: 'var(--brand-orange)' };
@@ -138,6 +224,14 @@ export default function ProductivityPage() {
     };
 
     const today = new Date().getDate() - 1;
+
+    if (loading) {
+        return (
+            <div className="page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+                <Loader2 size={32} className="animate-spin" style={{ color: 'var(--text-muted)' }} />
+            </div>
+        );
+    }
 
     return (
         <div className="page">
@@ -188,7 +282,7 @@ export default function ProductivityPage() {
                     <div style={{ display: 'flex', gap: 'var(--space-md)', marginBottom: 'var(--space-md)' }}>
                         {['Foundation', 'Growth', 'Scale'].map((phase, i) => (
                             <div key={phase} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <div style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: getPhase(i * 30).color }}></div>
+                                <div style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: getPhaseParams(i * 30).color }}></div>
                                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{phase}</span>
                             </div>
                         ))}
@@ -197,7 +291,7 @@ export default function ProductivityPage() {
                     {/* Grid */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(30, 1fr)', gap: 2 }}>
                         {habits.map((dayHabits, dayIndex) => {
-                            const phase = getPhase(dayIndex);
+                            const phase = getPhaseParams(dayIndex);
                             const isToday = dayIndex === today;
                             const isDone = dayHabits.some(h => h);
 
@@ -323,7 +417,7 @@ export default function ProductivityPage() {
                             />
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <span style={{ fontSize: '0.75rem', color: 'var(--text-disabled)' }}>
-                                    Last updated: {note.updatedAt}
+                                    Last updated: {new Date(note.updatedAt).toLocaleDateString()}
                                 </span>
                                 <button
                                     onClick={() => deleteNote(note.id)}
