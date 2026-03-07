@@ -146,7 +146,7 @@ export default function TasksPage() {
 }
 
 // Helper component for the icon
-function MessageSquare({ size, style }: { size: number; style: React.CSSProperties }) {
+function MessageSquareIcon({ size, style }: { size: number; style: React.CSSProperties }) {
     return (
         <svg
             width={size}
