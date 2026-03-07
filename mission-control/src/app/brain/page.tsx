@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Brain, Plus, Search, FileText, Link, Upload, Tag, Clock, X, Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Brain, Plus, Search, FileText, Link, Upload, Tag, Clock, X, Loader2, ChevronDown, PlusCircle } from 'lucide-react';
 
 interface Memory {
     id: string;
@@ -25,6 +25,20 @@ export default function BrainPage() {
     const [newCategory, setNewCategory] = useState('');
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+    const [isAddingNewCategory, setIsAddingNewCategory] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setShowCategoryDropdown(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     // Fetch facts from API
     const fetchFacts = async () => {
@@ -68,6 +82,20 @@ export default function BrainPage() {
         }
     };
 
+    // Get unique categories from existing memories
+    const existingCategories = [...new Set(memories.map(m => m.category).filter(Boolean))];
+
+    const handleCategorySelect = (category: string) => {
+        if (category === '__add_new__') {
+            setIsAddingNewCategory(true);
+            setNewCategory('');
+        } else {
+            setNewCategory(category);
+            setIsAddingNewCategory(false);
+        }
+        setShowCategoryDropdown(false);
+    };
+
     const handleAddMemory = async () => {
         if (!newContent.trim()) return;
 
@@ -87,6 +115,7 @@ export default function BrainPage() {
 
             setNewContent('');
             setNewCategory('');
+            setIsAddingNewCategory(false);
             fetchFacts();
         } catch (error) {
             console.error('Failed to add memory:', error);
@@ -178,13 +207,112 @@ export default function BrainPage() {
                     />
 
                     <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-                        <input
-                            className="input"
-                            placeholder="Category (e.g., preferences, links)"
-                            value={newCategory}
-                            onChange={(e) => setNewCategory(e.target.value)}
-                            style={{ flex: 1 }}
-                        />
+                        {/* Category Dropdown */}
+                        <div style={{ flex: 1, position: 'relative' }} ref={dropdownRef}>
+                            {isAddingNewCategory ? (
+                                <input
+                                    className="input"
+                                    placeholder="Type new category name..."
+                                    value={newCategory}
+                                    onChange={(e) => setNewCategory(e.target.value)}
+                                    autoFocus
+                                    onBlur={() => {
+                                        if (!newCategory.trim()) {
+                                            setIsAddingNewCategory(false);
+                                        }
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Escape') {
+                                            setIsAddingNewCategory(false);
+                                            setNewCategory('');
+                                        }
+                                    }}
+                                />
+                            ) : (
+                                <>
+                                    <button
+                                        type="button"
+                                        className="input"
+                                        onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                                        style={{
+                                            flex: 1,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            cursor: 'pointer',
+                                            textAlign: 'left'
+                                        }}
+                                    >
+                                        <span style={{ color: newCategory ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                                            {newCategory || 'Select category...'}
+                                        </span>
+                                        <ChevronDown size={16} style={{ color: 'var(--text-muted)' }} />
+                                    </button>
+                                    {showCategoryDropdown && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '100%',
+                                            left: 0,
+                                            right: 0,
+                                            backgroundColor: 'var(--bg-input)',
+                                            border: '1px solid var(--border-default)',
+                                            borderRadius: 'var(--radius-md)',
+                                            marginTop: 4,
+                                            zIndex: 100,
+                                            maxHeight: '200px',
+                                            overflowY: 'auto',
+                                            boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                                        }}>
+                                            {existingCategories.length > 0 ? (
+                                                existingCategories.map((cat) => (
+                                                    <div
+                                                        key={cat}
+                                                        onClick={() => handleCategorySelect(cat)}
+                                                        style={{
+                                                            padding: 'var(--space-sm) var(--space-md)',
+                                                            cursor: 'pointer',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: 'var(--space-sm)',
+                                                            color: 'var(--text-primary)',
+                                                            transition: 'background-color 0.15s'
+                                                        }}
+                                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-hover)'}
+                                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                                    >
+                                                        <Tag size={14} style={{ color: 'var(--text-muted)' }} />
+                                                        {cat}
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div style={{ padding: 'var(--space-md)', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                                                    No categories yet
+                                                </div>
+                                            )}
+                                            <div
+                                                onClick={() => handleCategorySelect('__add_new__')}
+                                                style={{
+                                                    padding: 'var(--space-sm) var(--space-md)',
+                                                    cursor: 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 'var(--space-sm)',
+                                                    color: 'var(--brand-blue)',
+                                                    borderTop: '1px solid var(--border-default)',
+                                                    fontWeight: 500,
+                                                    transition: 'background-color 0.15s'
+                                                }}
+                                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-hover)'}
+                                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                            >
+                                                <PlusCircle size={14} />
+                                                Add new category
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
                         <button
                             className="btn btn-primary"
                             onClick={handleAddMemory}
