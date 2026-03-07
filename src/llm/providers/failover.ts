@@ -5,6 +5,7 @@
  */
 
 import { LLMProvider, LLMMessage, LLMTool, LLMResponse, LLMProviderType } from '../types.js';
+import { config } from '../../config.js';
 
 export class FailoverProvider implements LLMProvider {
     readonly type: LLMProviderType = 'failover';
@@ -23,6 +24,16 @@ export class FailoverProvider implements LLMProvider {
         this.availableModels = [...new Set(providers.flatMap(p => p.availableModels))];
     }
 
+    setModel(model: string): void {
+        // Update all providers in the chain
+        this.providers.forEach(p => p.setModel(model));
+    }
+
+    getModel(): string {
+        // Return model of first provider as current best represention
+        return this.providers[0].getModel();
+    }
+
     async processMessage(
         messages: LLMMessage[],
         tools?: LLMTool[],
@@ -32,12 +43,21 @@ export class FailoverProvider implements LLMProvider {
 
         for (const provider of this.providers) {
             try {
-                console.log(`[Failover] Attempting with provider: ${provider.type}`);
-                return await provider.processMessage(messages, tools, systemInstruction);
+                console.log(`[Failover] Attempting with provider: ${provider.type} (timeout: ${config.llmFailoverTimeout / 1000}s)`);
+
+                // Race the provider request against a timeout promise
+                const result = await Promise.race([
+                    provider.processMessage(messages, tools, systemInstruction),
+                    new Promise<never>((_, reject) =>
+                        setTimeout(() => reject(new Error(`Timeout after ${config.llmFailoverTimeout / 1000}s`)), config.llmFailoverTimeout)
+                    )
+                ]);
+
+                return result;
             } catch (error: any) {
-                console.warn(`[Failover] Provider ${provider.type} failed: ${error.message}`);
+                console.warn(`[Failover] Provider ${provider.type} failed or timed out: ${error.message}`);
                 lastError = error;
-                // Continue to next provider
+                // Move to next provider
             }
         }
 

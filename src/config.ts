@@ -7,6 +7,7 @@ interface Config {
     llmProvider: LLMProviderType;
     llmModel: string;
     llmFailoverPriority: LLMProviderType[];
+    llmFailoverTimeout: number;
 
     // API Keys
     openaiApiKey?: string;
@@ -28,7 +29,8 @@ const rawConfig = {
     telegramAllowedUserId: Number(process.env.TELEGRAM_ALLOWED_USER_ID),
     llmProvider: (process.env.LLM_PROVIDER || 'google') as LLMProviderType,
     llmModel: process.env.LLM_MODEL || '',
-    llmFailoverPriority: (process.env.LLM_FAILOVER_PRIORITY?.split(',') || ['anthropic', 'openai', 'google', 'groq']) as LLMProviderType[],
+    llmFailoverPriority: (process.env.LLM_FAILOVER_PRIORITY?.split(',').map(p => p.trim()).filter(p => p.length > 0) || ['anthropic', 'openai', 'google', 'groq']) as LLMProviderType[],
+    llmFailoverTimeout: Number(process.env.LLM_FAILOVER_TIMEOUT || 10) * 1000, // Default 10 seconds
 
     // API Keys
     openaiApiKey: process.env.OPENAI_API_KEY,
@@ -85,6 +87,7 @@ export const config: Config = {
     llmProvider: rawConfig.llmProvider,
     llmModel: rawConfig.llmModel,
     llmFailoverPriority: rawConfig.llmFailoverPriority,
+    llmFailoverTimeout: rawConfig.llmFailoverTimeout,
     openaiApiKey: rawConfig.openaiApiKey,
     anthropicApiKey: rawConfig.anthropicApiKey,
     geminiApiKey: rawConfig.geminiApiKey,

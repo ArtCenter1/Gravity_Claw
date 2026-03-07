@@ -29,6 +29,14 @@ export class OpenRouterProvider implements LLMProvider {
         this.availableModels = PROVIDER_MODELS.openrouter.map(m => m.id);
     }
 
+    setModel(model: string): void {
+        this.model = model;
+    }
+
+    getModel(): string {
+        return this.model;
+    }
+
     async processMessage(
         messages: LLMMessage[],
         tools?: LLMTool[],

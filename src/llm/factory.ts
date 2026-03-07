@@ -6,6 +6,7 @@
 
 import { LLMProvider, LLMProviderType, PROVIDER_MODELS } from './types.js';
 import { config, getProviderApiKeyByType } from '../config.js';
+import { getSetting, saveSetting } from '../memory/settings.js';
 import { OpenAIProvider } from './providers/openai.js';
 import { GoogleProvider } from './providers/google.js';
 import { OpenRouterProvider } from './providers/openrouter.js';
@@ -25,14 +26,17 @@ let currentProviderType: LLMProviderType | null = null;
  * Get or create the active LLM provider
  */
 export function getLLMProvider(): LLMProvider {
-    // Return cached provider if already initialized
-    if (currentProvider && currentProviderType === config.llmProvider) {
+    const providerType = getSetting('llm_provider', config.llmProvider) as LLMProviderType;
+    const model = getSetting('model', config.llmModel);
+
+    // Return cached provider if already initialized and matches current settings
+    if (currentProvider && currentProviderType === providerType && currentProvider.getModel() === model) {
         return currentProvider;
     }
 
-    // Create new provider based on config
-    currentProvider = createProvider(config.llmProvider, config.llmModel);
-    currentProviderType = config.llmProvider;
+    // Create new provider based on settings
+    currentProvider = createProvider(providerType, model);
+    currentProviderType = providerType;
 
     return currentProvider;
 }
@@ -147,6 +151,17 @@ export function getFailoverProvider(): LLMProvider {
  */
 export function switchProvider(providerType: LLMProviderType, model?: string): LLMProvider {
     console.log(`[LLM] Switching to ${providerType}${model ? ` (${model})` : ''}`);
+
+    // Persist to DB so it survives restarts and syncs with Mission Control
+    saveSetting('llm_provider', providerType);
+    if (model) {
+        saveSetting('model', model);
+    } else {
+        // Use default model for the provider if none specified
+        const defaultModel = PROVIDER_MODELS[providerType]?.[0]?.id;
+        if (defaultModel) saveSetting('model', defaultModel);
+    }
+
     currentProvider = createProvider(providerType, model);
     currentProviderType = providerType;
     return currentProvider;

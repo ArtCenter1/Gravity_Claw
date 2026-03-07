@@ -88,6 +88,9 @@ export interface LLMProvider {
         tools?: LLMTool[],
         systemInstruction?: string
     ): AsyncGenerator<string, void, unknown>;
+
+    getModel(): string;
+    setModel(model: string): void;
 }
 
 // ============================================================================
