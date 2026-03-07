@@ -8,6 +8,8 @@ import { LLMProvider, LLMProviderType, PROVIDER_MODELS } from './types.js';
 import { config, getProviderApiKeyByType } from '../config.js';
 import { OpenAIProvider } from './providers/openai.js';
 import { GoogleProvider } from './providers/google.js';
+import { OpenRouterProvider } from './providers/openrouter.js';
+import { FailoverProvider } from './providers/failover.js';
 
 // Lazy-loaded providers (only import when needed)
 let AnthropicProvider: any = null;
@@ -98,11 +100,46 @@ export function createProvider(
                 `${ollamaURL}/v1`
             );
 
+        case 'openrouter':
+            return new OpenRouterProvider(apiKey!, model || 'openai/gpt-4o');
+
+        case 'failover':
+            return getFailoverProvider();
+
         default:
             // Default to Google
             console.warn(`Unknown provider ${providerType}, defaulting to Google`);
             return new GoogleProvider(apiKey!, model || 'gemini-2.0-flash');
     }
+}
+
+/**
+ * Create a failover provider with a default priority list
+ */
+export function getFailoverProvider(): LLMProvider {
+    const providers: LLMProvider[] = [];
+
+    // Use priority list from config
+    const priorityList = config.llmFailoverPriority;
+
+    for (const type of priorityList) {
+        const apiKey = getProviderApiKeyByType(type);
+        if (apiKey) {
+            try {
+                providers.push(createProvider(type));
+            } catch (e) {
+                console.warn(`[Factory] Failed to create provider ${type} for failover:`, e);
+            }
+        }
+    }
+
+    if (providers.length === 0) {
+        // Absolute fallback to Google if no other keys found
+        const googleKey = getProviderApiKeyByType('google');
+        return new GoogleProvider(googleKey!, 'gemini-2.0-flash');
+    }
+
+    return new FailoverProvider(providers);
 }
 
 /**
@@ -140,5 +177,7 @@ export function getConfiguredProviders(): { type: LLMProviderType; name: string;
         { type: 'deepseek', name: 'DeepSeek', hasKey: !!config.deepseekApiKey },
         { type: 'groq', name: 'Groq', hasKey: !!config.groqApiKey },
         { type: 'ollama', name: 'Ollama (Local)', hasKey: true }, // Local doesn't need API key
+        { type: 'openrouter', name: 'OpenRouter', hasKey: !!config.openrouterApiKey },
+        { type: 'failover', name: 'Model Failover', hasKey: true },
     ];
 }

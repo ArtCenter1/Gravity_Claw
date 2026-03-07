@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import {
     LayoutDashboard,
     Zap,
@@ -25,6 +26,37 @@ const navItems = [
 
 export default function Sidebar() {
     const pathname = usePathname();
+    const [status, setStatus] = useState({ provider: '...', model: '...' });
+
+    const fetchStatus = async () => {
+        try {
+            const res = await fetch('/api/settings');
+            const data = await res.json();
+            const provider = data.settings?.llm_provider || 'google';
+            const model = data.settings?.model || 'gemini-1.5-flash';
+            setStatus({
+                provider: provider.charAt(0).toUpperCase() + provider.slice(1),
+                model: model
+            });
+        } catch (error) {
+            console.error('Failed to fetch sidebar status:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchStatus();
+
+        // Refresh every 30 seconds
+        const interval = setInterval(fetchStatus, 30000);
+
+        // Listen for manual updates (from Settings page)
+        window.addEventListener('settings-updated', fetchStatus);
+
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('settings-updated', fetchStatus);
+        };
+    }, []);
 
     return (
         <aside style={styles.sidebar}>
@@ -46,7 +78,7 @@ export default function Sidebar() {
                     <span style={styles.statusText}>Agent Online</span>
                 </div>
                 <div style={styles.statusDetails}>
-                    Railway · Gemini 3.1 Pro
+                    Railway · {status.model}
                 </div>
             </div>
 

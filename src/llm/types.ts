@@ -10,7 +10,7 @@ import { FunctionDeclaration } from '@google/generative-ai';
 // Types
 // ============================================================================
 
-export type LLMProviderType = 'openai' | 'anthropic' | 'google' | 'gemini' | 'deepseek' | 'groq' | 'ollama';
+export type LLMProviderType = 'openai' | 'anthropic' | 'google' | 'gemini' | 'deepseek' | 'groq' | 'ollama' | 'openrouter' | 'failover';
 
 export interface LLMMessage {
     role: 'system' | 'user' | 'assistant' | 'tool';
@@ -166,6 +166,16 @@ export const PROVIDER_MODELS: Record<LLMProviderType, ProviderModelInfo[]> = {
         { id: 'llama3', name: 'Llama 3', provider: 'ollama', description: 'Meta Llama 3 (local)', contextWindow: 8192, supportsTools: false, supportsVision: false },
         { id: 'mistral', name: 'Mistral', provider: 'ollama', description: 'Mistral (local)', contextWindow: 8192, supportsTools: false, supportsVision: false },
         { id: 'codellama', name: 'CodeLlama', provider: 'ollama', description: 'Code specialized (local)', contextWindow: 16384, supportsTools: false, supportsVision: false },
+    ],
+    openrouter: [
+        { id: 'openai/gpt-4o', name: 'GPT-4o (OpenRouter)', provider: 'openrouter', description: 'OpenRouter GPT-4o', contextWindow: 128000, supportsTools: true, supportsVision: true },
+        { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet (OpenRouter)', provider: 'openrouter', description: 'OpenRouter Claude 3.5 Sonnet', contextWindow: 200000, supportsTools: true, supportsVision: true },
+        { id: 'google/gemini-2.0-flash-001', name: 'Gemini 2.0 Flash (OpenRouter)', provider: 'openrouter', description: 'OpenRouter Gemini 2.0 Flash', contextWindow: 1000000, supportsTools: true, supportsVision: true },
+        { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B (OpenRouter)', provider: 'openrouter', description: 'OpenRouter Llama 3.3 70B', contextWindow: 128000, supportsTools: true, supportsVision: false },
+        { id: 'deepseek/deepseek-chat', name: 'DeepSeek V3 (OpenRouter)', provider: 'openrouter', description: 'OpenRouter DeepSeek V3', contextWindow: 64000, supportsTools: true, supportsVision: false },
+    ],
+    failover: [
+        { id: 'auto', name: 'Automatic Failover', provider: 'failover', description: 'Priority based on configuration', contextWindow: 128000, supportsTools: true, supportsVision: true },
     ],
 };
 

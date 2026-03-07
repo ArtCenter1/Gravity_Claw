@@ -34,58 +34,70 @@ bot.command('model', async (ctx) => {
     if (!message) return;
 
     const args = message.text.split(' ').slice(1);
-    const currentProvider = getCurrentProviderType();
     const configuredProviders = getConfiguredProviders();
+    const currentProvider = getCurrentProviderType();
+
+    // Flatten all available models into a single list
+    const allOptions: { provider: LLMProviderType; model: string; label: string }[] = [];
+    for (const p of configuredProviders) {
+        if (!p.hasKey && p.type !== 'ollama' && p.type !== 'failover') continue;
+
+        const models = getModelsForProvider(p.type);
+        for (const mId of models) {
+            allOptions.push({
+                provider: p.type,
+                model: mId,
+                label: `${p.name} - ${mId}`
+            });
+        }
+    }
 
     if (args.length === 0) {
-        // Show current model and available options
-        let message = `🤖 Current LLM Provider: **${currentProvider.toUpperCase()}**\n\n`;
-        message += `Available providers:\n`;
+        let msg = `🤖 **Current Model Selection**\n\n`;
+        msg += `Pick a number to hot-swap:\n\n`;
 
-        for (const p of configuredProviders) {
-            const status = p.hasKey ? '✅' : '❌';
-            const selected = p.type === currentProvider ? ' *(selected)*' : '';
-            message += `${status} ${p.name}${selected}\n`;
+        allOptions.forEach((opt, i) => {
+            const isSelected = opt.provider === currentProvider; // Rough check
+            msg += `${i + 1}. ${isSelected ? '✅ ' : ''}${opt.label}\n`;
+        });
+
+        msg += `\nUsage: \`/model <number>\` or \`/model <provider> [model]\``;
+        await ctx.reply(msg, { parse_mode: 'Markdown' });
+        return;
+    }
+
+    let targetProvider: LLMProviderType | undefined;
+    let targetModel: string | undefined;
+
+    // Check if it's a number
+    const selectionIndex = parseInt(args[0]) - 1;
+    if (!isNaN(selectionIndex) && allOptions[selectionIndex]) {
+        const selection = allOptions[selectionIndex];
+        targetProvider = selection.provider;
+        targetModel = selection.model;
+    } else {
+        // Fallback to provider/model text search
+        targetProvider = args[0].toLowerCase() as LLMProviderType;
+        targetModel = args[1];
+
+        const providerConfig = configuredProviders.find(p => p.type === targetProvider);
+        if (!providerConfig) {
+            await ctx.reply(`❌ Unknown selection. Use a number or a valid provider name.`);
+            return;
         }
 
-        message += `\nTo switch, use: /model <provider> [model]`;
-        message += `\nExample: /model openai gpt-4o-mini`;
-
-        await ctx.reply(message, { parse_mode: 'Markdown' });
-        return;
-    }
-
-    const newProvider = args[0].toLowerCase() as LLMProviderType;
-    const newModel = args[1];
-
-    // Validate provider
-    const providerConfig = configuredProviders.find(p => p.type === newProvider);
-    if (!providerConfig) {
-        await ctx.reply(`Unknown provider: ${args[0]}\n\nAvailable: openai, anthropic, google, deepseek, groq, ollama`);
-        return;
-    }
-
-    if (!providerConfig.hasKey && newProvider !== 'ollama') {
-        await ctx.reply(`❌ No API key configured for ${providerConfig.name}.\nAdd it to your environment variables.`);
-        return;
-    }
-
-    // Validate model if provided
-    if (newModel) {
-        const availableModels = getModelsForProvider(newProvider);
-        if (!availableModels.includes(newModel)) {
-            await ctx.reply(`Model "${newModel}" not available for ${providerConfig.name}.\n\nAvailable models:\n${availableModels.join('\n')}`);
+        if (!providerConfig.hasKey && targetProvider !== 'ollama' && targetProvider !== 'failover') {
+            await ctx.reply(`❌ No API key configured for ${providerConfig.name}.`);
             return;
         }
     }
 
     // Switch provider
     try {
-        switchProvider(newProvider, newModel);
-        const newProviderType = getCurrentProviderType();
-        await ctx.reply(`✅ Switched to **${newProviderType.toUpperCase()}**${newModel ? ` (${newModel})` : ''}!`);
+        switchProvider(targetProvider, targetModel);
+        await ctx.reply(`✅ Successfully switched to **${targetProvider.toUpperCase()}**${targetModel ? ` (${targetModel})` : ''}!`);
     } catch (error: any) {
-        await ctx.reply(`Failed to switch provider: ${error.message}`);
+        await ctx.reply(`❌ Failed to switch: ${error.message}`);
     }
 });
 

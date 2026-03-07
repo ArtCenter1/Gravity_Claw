@@ -6,6 +6,7 @@ interface Config {
     telegramAllowedUserId: number;
     llmProvider: LLMProviderType;
     llmModel: string;
+    llmFailoverPriority: LLMProviderType[];
 
     // API Keys
     openaiApiKey?: string;
@@ -14,6 +15,7 @@ interface Config {
     deepseekApiKey?: string;
     groqApiKey?: string;
     ollamaBaseURL?: string;
+    openrouterApiKey?: string;
 
     // Other services
     cartesiaApiKey?: string;
@@ -26,6 +28,7 @@ const rawConfig = {
     telegramAllowedUserId: Number(process.env.TELEGRAM_ALLOWED_USER_ID),
     llmProvider: (process.env.LLM_PROVIDER || 'google') as LLMProviderType,
     llmModel: process.env.LLM_MODEL || '',
+    llmFailoverPriority: (process.env.LLM_FAILOVER_PRIORITY?.split(',') || ['anthropic', 'openai', 'google', 'groq']) as LLMProviderType[],
 
     // API Keys
     openaiApiKey: process.env.OPENAI_API_KEY,
@@ -34,6 +37,7 @@ const rawConfig = {
     deepseekApiKey: process.env.DEEPSEEK_API_KEY,
     groqApiKey: process.env.GROQ_API_KEY,
     ollamaBaseURL: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
+    openrouterApiKey: process.env.OPENROUTER_API_KEY,
 
     // Other services
     cartesiaApiKey: process.env.CARTESIA_API_KEY,
@@ -58,6 +62,7 @@ function getProviderApiKey(provider: LLMProviderType): string | undefined {
         case 'deepseek': return rawConfig.deepseekApiKey;
         case 'groq': return rawConfig.groqApiKey;
         case 'ollama': return rawConfig.ollamaBaseURL; // Ollama doesn't need API key
+        case 'openrouter': return rawConfig.openrouterApiKey;
         default: return undefined;
     }
 }
@@ -79,12 +84,14 @@ export const config: Config = {
     telegramAllowedUserId: rawConfig.telegramAllowedUserId,
     llmProvider: rawConfig.llmProvider,
     llmModel: rawConfig.llmModel,
+    llmFailoverPriority: rawConfig.llmFailoverPriority,
     openaiApiKey: rawConfig.openaiApiKey,
     anthropicApiKey: rawConfig.anthropicApiKey,
     geminiApiKey: rawConfig.geminiApiKey,
     deepseekApiKey: rawConfig.deepseekApiKey,
     groqApiKey: rawConfig.groqApiKey,
     ollamaBaseURL: rawConfig.ollamaBaseURL,
+    openrouterApiKey: rawConfig.openrouterApiKey,
     cartesiaApiKey: rawConfig.cartesiaApiKey,
     supabaseUrl: rawConfig.supabaseUrl,
     supabaseServiceKey: rawConfig.supabaseServiceKey,
