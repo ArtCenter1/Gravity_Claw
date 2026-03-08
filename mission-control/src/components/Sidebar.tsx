@@ -31,6 +31,9 @@ export default function Sidebar() {
     const fetchStatus = async () => {
         try {
             const res = await fetch('/api/settings');
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
             const data = await res.json();
             const provider = data.settings?.llm_provider || 'google';
             const model = data.settings?.model || 'gemini-1.5-flash';
@@ -39,7 +42,9 @@ export default function Sidebar() {
                 model: model
             });
         } catch (error) {
-            console.error('Failed to fetch sidebar status:', error);
+            console.error('Sidebar fetchStatus error:', error);
+            // Don't update state to generic '...' if it fails, 
+            // maybe keep previous or show 'Error'
         }
     };
 
