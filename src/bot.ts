@@ -55,11 +55,14 @@ bot.command('model', async (ctx) => {
 
     // Load actual saved provider and model from database to ensure sync with Mission-Control
     // Use config defaults if not set in database, and validate against known providers
-    const validProviders: LLMProviderType[] = ['google', 'openai', 'anthropic', 'deepseek', 'groq', 'ollama', 'openrouter'];
+    const validProviders: LLMProviderType[] = ['google', 'gemini', 'openai', 'anthropic', 'deepseek', 'groq', 'ollama', 'openrouter', 'failover'];
     const savedProviderRaw = getSetting('llm_provider', config.llmProvider);
-    const savedProvider = validProviders.includes(savedProviderRaw as LLMProviderType)
+    let savedProvider = validProviders.includes(savedProviderRaw as LLMProviderType)
         ? savedProviderRaw as LLMProviderType
         : config.llmProvider as LLMProviderType;
+
+    // Consolidate google/gemini for comparison
+    const normalizedSavedProvider = (savedProvider === 'gemini') ? 'google' : savedProvider;
 
     // Validate saved model against available models for the provider
     const availableModels = getModelsForProvider(savedProvider);
@@ -87,7 +90,9 @@ bot.command('model', async (ctx) => {
 
         allOptions.forEach((opt, i) => {
             // Check if this option matches the saved provider AND model
-            const isSelected = opt.provider === savedProvider && opt.model === savedModel;
+            // Treat 'google' and 'gemini' as equivalent for the check
+            const optNormalized = opt.provider === 'gemini' ? 'google' : opt.provider;
+            const isSelected = optNormalized === normalizedSavedProvider && opt.model === savedModel;
             msg += `${i + 1}. ${isSelected ? '✅ ' : ''}${opt.label}\n`;
         });
 
