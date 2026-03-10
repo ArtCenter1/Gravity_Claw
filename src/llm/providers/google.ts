@@ -36,6 +36,46 @@ export class GoogleProvider implements LLMProvider {
         return this.model;
     }
 
+    /**
+     * Sanitize JSON Schema parameters to be compatible with Google Gemini
+     * Removes: $schema, additionalProperties, any_of, etc.
+     * Fixes: items without type field
+     * 
+     * KNOWN LIMITATIONS:
+     * - anyOf/oneOf arrays are not fully supported
+     * - definitions/$defs are not preserved
+     * - custom formats are not preserved
+     */
+    private sanitizeParameters(params: any): any {
+        if (!params) return undefined;
+        if (typeof params !== 'object') return params;
+
+        const result: any = {};
+
+        // Copy allowed fields
+        if (params.type) result.type = params.type;
+        if (params.properties) {
+            result.properties = {};
+            for (const [key, prop] of Object.entries(params.properties)) {
+                result.properties[key] = this.sanitizeParameters(prop);
+            }
+        }
+        if (params.required) result.required = params.required;
+        if (params.enum) result.enum = params.enum;
+
+        // Handle array items - Google Gemini requires 'type' for items
+        if (params.items) {
+            result.items = this.sanitizeParameters(params.items);
+            // Ensure items has a type - warn about implicit default
+            if (!result.items.type) {
+                console.warn(`GoogleProvider: Defaulting to 'string' type for array items. Consider explicitly defining the type in your JSON Schema.`);
+                result.items.type = 'string';
+            }
+        }
+
+        return result;
+    }
+
     async processMessage(
         messages: LLMMessage[],
         tools?: LLMTool[],
@@ -53,12 +93,16 @@ export class GoogleProvider implements LLMProvider {
             systemInstruction: activeSystemInstruction,
         });
 
-        // Convert tools to Gemini format
-        const geminiTools = tools?.map(tool => ({
-            name: tool.function.name,
-            description: tool.function.description,
-            parameters: tool.function.parameters as any,
-        })) || [];
+        // Convert tools to Gemini format - strip unsupported JSON Schema fields
+        const geminiTools = tools?.map(tool => {
+            // Deep clone and clean up parameters for Google Gemini
+            const cleanParams = this.sanitizeParameters(tool.function.parameters);
+            return {
+                name: tool.function.name,
+                description: tool.function.description,
+                parameters: cleanParams,
+            };
+        }) || [];
 
         const chatConfig: any = {
             history: [],

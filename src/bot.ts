@@ -22,6 +22,23 @@ bot.command('start', async (ctx) => {
     await ctx.reply('Hello! I am Gravity Claw. I am ready to assist you safely.');
 });
 
+bot.command('ping', async (ctx) => {
+    await ctx.reply('🟢 Pong! I am online and ready to receive your instructions.');
+});
+
+bot.command('help', async (ctx) => {
+    const helpText = `📚 **Available Commands:**
+
+` +
+        `/start - Start the bot and get a greeting\n` +
+        `/ping - Check if the bot is online\n` +
+        `/talk - Toggle voice talk mode\n` +
+        `/model - Switch LLM model\n` +
+        `/help - Show this help message\n\n` +
+        `You can also just send me a message and I'll respond!`;
+    await ctx.reply(helpText, { parse_mode: 'Markdown' });
+});
+
 bot.command('talk', async (ctx) => {
     const currentMode = getSetting('talk_mode', 'off');
     const newMode = currentMode === 'on' ? 'off' : 'on';
@@ -35,7 +52,19 @@ bot.command('model', async (ctx) => {
 
     const args = message.text.split(' ').slice(1);
     const configuredProviders = getConfiguredProviders();
-    const currentProvider = getCurrentProviderType();
+
+    // Load actual saved provider and model from database to ensure sync with Mission-Control
+    // Use config defaults if not set in database, and validate against known providers
+    const validProviders: LLMProviderType[] = ['google', 'openai', 'anthropic', 'deepseek', 'groq', 'ollama', 'openrouter'];
+    const savedProviderRaw = getSetting('llm_provider', config.llmProvider);
+    const savedProvider = validProviders.includes(savedProviderRaw as LLMProviderType)
+        ? savedProviderRaw as LLMProviderType
+        : config.llmProvider as LLMProviderType;
+
+    // Validate saved model against available models for the provider
+    const availableModels = getModelsForProvider(savedProvider);
+    const savedModelRaw = getSetting('model', config.llmModel || 'gemini-2.0-flash');
+    const savedModel = availableModels.includes(savedModelRaw) ? savedModelRaw : (config.llmModel || 'gemini-2.0-flash');
 
     // Flatten all available models into a single list
     const allOptions: { provider: LLMProviderType; model: string; label: string }[] = [];
@@ -57,7 +86,8 @@ bot.command('model', async (ctx) => {
         msg += `Pick a number to hot-swap:\n\n`;
 
         allOptions.forEach((opt, i) => {
-            const isSelected = opt.provider === currentProvider; // Rough check
+            // Check if this option matches the saved provider AND model
+            const isSelected = opt.provider === savedProvider && opt.model === savedModel;
             msg += `${i + 1}. ${isSelected ? '✅ ' : ''}${opt.label}\n`;
         });
 
@@ -95,6 +125,11 @@ bot.command('model', async (ctx) => {
     // Switch provider
     try {
         switchProvider(targetProvider, targetModel);
+
+        // Persist settings to database for Mission-Control sync
+        saveSetting('llm_provider', targetProvider);
+        if (targetModel) saveSetting('model', targetModel);
+
         await ctx.reply(`✅ Successfully switched to **${targetProvider.toUpperCase()}**${targetModel ? ` (${targetModel})` : ''}!`);
     } catch (error: any) {
         await ctx.reply(`❌ Failed to switch: ${error.message}`);

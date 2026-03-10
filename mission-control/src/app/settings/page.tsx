@@ -46,9 +46,6 @@ const PROVIDER_MODELS: Record<string, ProviderModelInfo[]> = {
         { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet (OpenRouter)', provider: 'openrouter', description: 'OpenRouter Claude 3.5 Sonnet' },
         { id: 'google/gemini-2.0-flash-001', name: 'Gemini 2.0 Flash (OpenRouter)', provider: 'openrouter', description: 'OpenRouter Gemini 2.0 Flash' },
     ],
-    failover: [
-        { id: 'failover-auto', name: 'Automatic Failover', provider: 'failover', description: 'Priority: Anthropic > OpenAI > Google' },
-    ],
 };
 
 export default function SettingsPage() {
@@ -70,7 +67,6 @@ export default function SettingsPage() {
         { value: 'groq', label: 'Groq' },
         { value: 'ollama', label: 'Ollama (Local)' },
         { value: 'openrouter', label: 'OpenRouter' },
-        { value: 'failover', label: 'Model Failover' },
     ];
 
     // Get models for selected provider

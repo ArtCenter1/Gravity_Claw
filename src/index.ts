@@ -1,5 +1,6 @@
 import { bot } from './bot.js';
 import { db } from './db/sqlite.js';
+import { config } from './config.js';
 import { initializeMCPServers, closeMCPServers } from './mcp/client.js';
 import { setupHeartbeat } from './heartbeat.js';
 
@@ -49,8 +50,20 @@ async function main() {
 
     console.log('[System] Connecting to Telegram...');
     await bot.start({
-        onStart: (botInfo: any) => {
+        onStart: async (botInfo: any) => {
             console.log(`[Bot] SUCCESS: Started as @${botInfo.username}`);
+
+            // Send greeting to the allowed user to confirm bot is online
+            try {
+                await bot.api.sendMessage(
+                    config.telegramAllowedUserId,
+                    `🟢 **Gravity Claw is Online!**\n\nI am ready to receive your instructions.\n\nType /help for available commands.`,
+                    { parse_mode: 'Markdown' }
+                );
+                console.log('[Bot] Startup greeting sent to user');
+            } catch (e) {
+                console.error('[Bot] Failed to send startup greeting:', e);
+            }
         },
     });
 }
