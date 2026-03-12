@@ -1,3 +1,6 @@
+
+![gravity_claw_banner](https://github.com/user-attachments/assets/69865456-3610-4517-9704-32fdc376cdf8)
+
 Gravity_Claw is a sophisticated, secure personal AI agent framework with:
 
 Purpose
