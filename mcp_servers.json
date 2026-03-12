@@ -21,6 +21,10 @@
                 "-y",
                 "@modelcontextprotocol/server-brave-search"
             ]
+        },
+        "notebooklm": {
+            "command": "notebooklm-mcp",
+            "args": []
         }
     }
 }
