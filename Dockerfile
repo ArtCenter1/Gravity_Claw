@@ -1,6 +1,10 @@
 # Use Node.js 22 alpine image for smaller footprint
 FROM node:22-alpine
 
+# Label for version tracking
+LABEL version="0.1.0"
+LABEL description="Gravity Claw AI Agent with Self-Improving Learning Loop"
+
 WORKDIR /app
 
 # Install native dependencies required for some packages (like better-sqlite3)
@@ -16,8 +20,8 @@ RUN npm install
 COPY src/ ./src/
 COPY tsconfig.json ./
 
-# Create data directory for volume mapping
-RUN mkdir -p .data
+# Create directories for volume mapping
+RUN mkdir -p .data skills
 
 # Try to build if needed, but since we run with `tsx`, we don't necessarily need a tsc build step for start
 # If 'npm start' requires built files, we'd build here.

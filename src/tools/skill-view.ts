@@ -57,6 +57,7 @@ export async function skillView(args: Record<string, any>): Promise<string> {
     return skillContent;
   } catch (error) {
     console.error('Error in skill_view tool:', error);
-    return `Error viewing skill: ${error.message}`;
+    const message = error instanceof Error ? error.message : String(error);
+    return `Error viewing skill: ${message}`;
   }
 }

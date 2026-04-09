@@ -11,6 +11,7 @@ services:
       - .env
     volumes:
       - ./.data:/app/.data
+      - ./skills:/app/skills
 
   mission-control:
     build:

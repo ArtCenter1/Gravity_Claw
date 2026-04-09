@@ -40,6 +40,7 @@ export async function skillList(args: Record<string, any>): Promise<string> {
     return `Available skills (${skills.length} total):\n\n${skillList}\n\nUse skill_view <skill_name> to see the details of a specific skill.`;
   } catch (error) {
     console.error('Error in skill_list tool:', error);
-    return `Error listing skills: ${error.message}`;
+    const message = error instanceof Error ? error.message : String(error);
+    return `Error listing skills: ${message}`;
   }
 }

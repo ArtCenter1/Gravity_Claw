@@ -73,6 +73,7 @@ export async function skillCreate(args: Record<string, any>): Promise<string> {
     }
   } catch (error) {
     console.error('Error in skill_create tool:', error);
-    return `Error creating skill: ${error.message}`;
+    const message = error instanceof Error ? error.message : String(error);
+    return `Error creating skill: ${message}`;
   }
 }

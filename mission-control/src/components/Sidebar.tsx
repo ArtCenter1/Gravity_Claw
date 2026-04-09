@@ -20,6 +20,7 @@ const navItems = [
     { href: '/tasks', label: 'Tasks', icon: CheckSquare },
     { href: '/content', label: 'Content Intel', icon: PlayCircle },
     { href: '/brain', label: 'Second Brain', icon: Brain },
+    { href: '/skills', label: 'Skills', icon: 'Zap' }, // Temporary icon, will replace
     { href: '/connections', label: 'Connections', icon: Plug },
     { href: '/settings', label: 'Settings', icon: Settings },
 ];
