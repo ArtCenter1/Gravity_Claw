@@ -25,6 +25,15 @@
         "notebooklm": {
             "command": "notebooklm-mcp",
             "args": []
+        },
+        "openspace": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "supergateway",
+                "--streamableHttp",
+                "http://localhost:8888/mcp"
+            ]
         }
     }
 }
