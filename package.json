@@ -1,6 +1,6 @@
 {
   "name": "gravity-claw",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A lean, secure, fully-understood personal AI agent.",
   "main": "src/index.ts",
   "type": "module",

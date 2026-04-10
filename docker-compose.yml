@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   bot:
+    image: gravity-claw-bot:0.1.0
     build: 
       context: .
       dockerfile: Dockerfile
@@ -14,6 +15,7 @@ services:
       - ./skills:/app/skills
 
   mission-control:
+    image: gravity-claw-ui:0.1.0
     build:
       context: ./mission-control
       dockerfile: Dockerfile

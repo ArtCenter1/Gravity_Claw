@@ -73,7 +73,7 @@ export default function Sidebar() {
                 </div>
                 <div>
                     <div style={styles.appName}>Gravity Claw</div>
-                    <div style={styles.version}>v1.0.0</div>
+                    <div style={styles.version}>v0.1.0</div>
                 </div>
             </div>
 
