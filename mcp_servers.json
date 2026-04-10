@@ -27,12 +27,14 @@
             "args": []
         },
         "openspace": {
-            "command": "npx",
+            "command": "docker",
             "args": [
-                "-y",
-                "supergateway",
-                "--streamableHttp",
-                "http://localhost:8888/mcp"
+                "exec",
+                "-i",
+                "openspace-evolution-engine",
+                "openspace-mcp",
+                "--transport",
+                "stdio"
             ]
         }
     }

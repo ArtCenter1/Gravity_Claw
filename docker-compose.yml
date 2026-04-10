@@ -13,6 +13,13 @@ services:
     volumes:
       - ./.data:/app/.data
       - ./skills:/app/skills
+      - ./mcp_servers.json:/app/mcp_servers.json
+      - /var/run/docker.sock:/var/run/docker.sock
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - default
+      - openspace-global_default
 
   mission-control:
     image: gravity-claw-ui:0.1.0
@@ -32,3 +39,9 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+networks:
+  default:
+    name: gravity_claw_default
+  openspace-global_default:
+    external: true

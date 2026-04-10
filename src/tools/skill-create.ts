@@ -7,7 +7,7 @@ import { skillManager } from '../skills/manager.js';
 export const name = 'skill_create';
 export const description = 'Create a new skill from the agent\'s experience and knowledge. Use this when the agent has learned a new capability or workflow that should be preserved for future use.';
 
-export const getCurrentTimeGeminiDef = {
+export const skillCreateGeminiDef = {
   name: 'skill_create',
   description: 'Create a new skill from the agent\'s experience and knowledge. Use this when the agent has learned a new capability or workflow that should be preserved for future use.',
   parameters: {
@@ -30,7 +30,7 @@ export const getCurrentTimeGeminiDef = {
   }
 };
 
-export const getCurrentTimeOpenAIDef = {
+export const skillCreateOpenAIDef = {
   type: 'function',
   function: {
     name: 'skill_create',

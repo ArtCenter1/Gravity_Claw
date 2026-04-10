@@ -7,7 +7,7 @@ import { skillManager } from '../skills/manager.js';
 export const name = 'skill_list';
 export const description = 'List all available skills that the agent has created. Use this to see what skills are available for use.';
 
-export const getCurrentTimeGeminiDef = {
+export const skillListGeminiDef = {
   name: 'skill_list',
   description: 'List all available skills that the agent has created. Use this to see what skills are available for use.',
   parameters: {
@@ -16,7 +16,7 @@ export const getCurrentTimeGeminiDef = {
   }
 };
 
-export const getCurrentTimeOpenAIDef = {
+export const skillListOpenAIDef = {
   type: 'function',
   function: {
     name: 'skill_list',

@@ -7,7 +7,7 @@ import { skillManager } from '../skills/manager.js';
 export const name = 'skill_view';
 export const description = 'View the content of a specific skill. Use this to see the details of a skill including its procedures, when to use, pitfalls, and verification steps.';
 
-export const getCurrentTimeGeminiDef = {
+export const skillViewGeminiDef = {
   name: 'skill_view',
   description: 'View the content of a specific skill. Use this to see the details of a skill including its procedures, when to use, pitfalls, and verification steps.',
   parameters: {
@@ -22,7 +22,7 @@ export const getCurrentTimeGeminiDef = {
   }
 };
 
-export const getCurrentTimeOpenAIDef = {
+export const skillViewOpenAIDef = {
   type: 'function',
   function: {
     name: 'skill_view',

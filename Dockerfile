@@ -8,7 +8,7 @@ LABEL description="Gravity Claw AI Agent with Self-Improving Learning Loop"
 WORKDIR /app
 
 # Install native dependencies required for some packages (like better-sqlite3)
-RUN apk add --no-cache python3 make g++ 
+RUN apk add --no-cache python3 make g++ curl docker-cli
 
 # Copy package files
 COPY package*.json ./

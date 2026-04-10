@@ -27,7 +27,7 @@ const navItems = [
 
 export default function Sidebar() {
     const pathname = usePathname();
-    const [status, setStatus] = useState({ provider: '...', model: '...' });
+    const [status, setStatus] = useState({ provider: '...', model: '...', agentStatus: 'offline' });
 
     const fetchStatus = async () => {
         try {
@@ -40,7 +40,8 @@ export default function Sidebar() {
             const model = data.settings?.model || 'gemini-1.5-flash';
             setStatus({
                 provider: provider.charAt(0).toUpperCase() + provider.slice(1),
-                model: model
+                model: model,
+                agentStatus: data.agentStatus || 'offline'
             });
         } catch (error) {
             console.error('Sidebar fetchStatus error:', error);
@@ -80,11 +81,20 @@ export default function Sidebar() {
             {/* Agent Status Card */}
             <div style={styles.statusCard}>
                 <div style={styles.statusHeader}>
-                    <div style={styles.statusDot}></div>
-                    <span style={styles.statusText}>Agent Online</span>
+                    <div style={{
+                        ...styles.statusDot,
+                        backgroundColor: status.agentStatus === 'online' ? 'var(--brand-green)' : 'var(--text-muted)',
+                        animation: status.agentStatus === 'online' ? 'pulse 2s ease-in-out infinite' : 'none'
+                    }}></div>
+                    <span style={{
+                        ...styles.statusText,
+                        color: status.agentStatus === 'online' ? 'var(--brand-green)' : 'var(--text-muted)'
+                    }}>
+                        Agent {status.agentStatus === 'online' ? 'Online' : 'Offline'}
+                    </span>
                 </div>
                 <div style={styles.statusDetails}>
-                    Railway · {status.model}
+                    Local Environment · {status.model}
                 </div>
             </div>
 
