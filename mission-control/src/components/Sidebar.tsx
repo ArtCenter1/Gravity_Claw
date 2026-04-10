@@ -20,13 +20,14 @@ const navItems = [
     { href: '/tasks', label: 'Tasks', icon: CheckSquare },
     { href: '/content', label: 'Content Intel', icon: PlayCircle },
     { href: '/brain', label: 'Second Brain', icon: Brain },
+    { href: '/skills', label: 'Skills', icon: 'Zap' }, // Temporary icon, will replace
     { href: '/connections', label: 'Connections', icon: Plug },
     { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
 export default function Sidebar() {
     const pathname = usePathname();
-    const [status, setStatus] = useState({ provider: '...', model: '...' });
+    const [status, setStatus] = useState({ provider: '...', model: '...', agentStatus: 'offline' });
 
     const fetchStatus = async () => {
         try {
@@ -39,7 +40,8 @@ export default function Sidebar() {
             const model = data.settings?.model || 'gemini-1.5-flash';
             setStatus({
                 provider: provider.charAt(0).toUpperCase() + provider.slice(1),
-                model: model
+                model: model,
+                agentStatus: data.agentStatus || 'offline'
             });
         } catch (error) {
             console.error('Sidebar fetchStatus error:', error);
@@ -72,18 +74,27 @@ export default function Sidebar() {
                 </div>
                 <div>
                     <div style={styles.appName}>Gravity Claw</div>
-                    <div style={styles.version}>v1.0.0</div>
+                    <div style={styles.version}>v0.1.0</div>
                 </div>
             </div>
 
             {/* Agent Status Card */}
             <div style={styles.statusCard}>
                 <div style={styles.statusHeader}>
-                    <div style={styles.statusDot}></div>
-                    <span style={styles.statusText}>Agent Online</span>
+                    <div style={{
+                        ...styles.statusDot,
+                        backgroundColor: status.agentStatus === 'online' ? 'var(--brand-green)' : 'var(--text-muted)',
+                        animation: status.agentStatus === 'online' ? 'pulse 2s ease-in-out infinite' : 'none'
+                    }}></div>
+                    <span style={{
+                        ...styles.statusText,
+                        color: status.agentStatus === 'online' ? 'var(--brand-green)' : 'var(--text-muted)'
+                    }}>
+                        Agent {status.agentStatus === 'online' ? 'Online' : 'Offline'}
+                    </span>
                 </div>
                 <div style={styles.statusDetails}>
-                    Railway · {status.model}
+                    Local Environment · {status.model}
                 </div>
             </div>
 

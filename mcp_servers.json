@@ -25,6 +25,17 @@
         "notebooklm": {
             "command": "notebooklm-mcp",
             "args": []
+        },
+        "openspace": {
+            "command": "docker",
+            "args": [
+                "exec",
+                "-i",
+                "openspace-evolution-engine",
+                "openspace-mcp",
+                "--transport",
+                "stdio"
+            ]
         }
     }
 }

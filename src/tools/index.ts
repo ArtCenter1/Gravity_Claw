@@ -4,6 +4,9 @@ import { rememberFactGeminiDef, rememberFactOpenAIDef, rememberFact } from './re
 import { recallMemoryGeminiDef, recallMemoryOpenAIDef, recallMemory } from './recall-memory.js';
 import { updateHeartbeatScheduleGeminiDef, updateHeartbeatScheduleOpenAIDef, updateHeartbeatSchedule } from './update-heartbeat-schedule.js';
 import { toggleTalkModeGeminiDef, toggleTalkModeOpenAIDef, toggleTalkMode } from './toggle-talk-mode.js';
+import { skillCreateGeminiDef, skillCreateOpenAIDef, skillCreate } from './skill-create.js';
+import { skillListGeminiDef, skillListOpenAIDef, skillList } from './skill-list.js';
+import { skillViewGeminiDef, skillViewOpenAIDef, skillView } from './skill-view.js';
 import { mcpGeminiTools, mcpOpenAITools, mcpToolRouting, executeMCPTool } from '../mcp/client.js';
 
 // The registry holding all tool definitions for Gemini (Static)
@@ -13,6 +16,9 @@ export const staticGeminiToolDeclarations: FunctionDeclaration[] = [
     recallMemoryGeminiDef,
     updateHeartbeatScheduleGeminiDef,
     toggleTalkModeGeminiDef,
+    skillCreateGeminiDef,
+    skillListGeminiDef,
+    skillViewGeminiDef,
 ];
 
 // The registry holding all tool definitions for OpenAI format (Static)
@@ -22,6 +28,9 @@ export const staticOpenAIToolDeclarations = [
     recallMemoryOpenAIDef,
     updateHeartbeatScheduleOpenAIDef,
     toggleTalkModeOpenAIDef,
+    skillCreateOpenAIDef,
+    skillListOpenAIDef,
+    skillViewOpenAIDef,
 ];
 
 // Dynamic getters to combine static and MCP tools
@@ -53,6 +62,12 @@ export async function executeTool(name: string, args: Record<string, any> | stri
             return await updateHeartbeatSchedule(parsedArgs);
         case 'toggle_talk_mode':
             return await toggleTalkMode(parsedArgs);
+        case 'skill_create':
+            return skillCreate(parsedArgs);
+        case 'skill_list':
+            return skillList(parsedArgs);
+        case 'skill_view':
+            return skillView(parsedArgs);
         default:
             throw new Error(`Tool ${name} is not registered`);
     }
