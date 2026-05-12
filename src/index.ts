@@ -1,3 +1,4 @@
+import http from 'http';
 import { bot } from './bot.js';
 import { db } from './db/sqlite.js';
 import { config } from './config.js';
@@ -49,6 +50,22 @@ async function main() {
     }
 
     console.log('[System] Connecting to Telegram...');
+
+    // Start a minimal health check server on port 8080
+    const healthServer = http.createServer((req, res) => {
+        if (req.url === '/health') {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ status: 'online', timestamp: new Date().toISOString() }));
+        } else {
+            res.writeHead(404);
+            res.end();
+        }
+    });
+
+    healthServer.listen(8080, () => {
+        console.log('[System] Health check server listening on port 8080');
+    });
+
     await bot.start({
         onStart: async (botInfo: any) => {
             console.log(`[Bot] SUCCESS: Started as @${botInfo.username}`);

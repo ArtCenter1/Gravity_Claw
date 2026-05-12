@@ -11,6 +11,7 @@ A sophisticated, secure, and fully-understood personal AI agent system featuring
 - Voice synthesis via Cartesia for natural speech output
 - Model Context Protocol (MCP) support for extensible tool usage
 - Failover mechanisms for robust AI service continuity
+- 🔄 **Self-Improving Learning Loop** - Autonomous skill creation from experience and continuous self-enhancement
 
 ### 💬 Communication
 - Telegram bot integration using Grammy framework for seamless messaging
@@ -22,10 +23,13 @@ A sophisticated, secure, and fully-understood personal AI agent system featuring
 - SQLite local database with better-sqlite3 for offline capabilities
 - Automatic task scheduling with node-cron for timed operations
 - Memory management system with short-term buffer and long-term semantic storage
+- Persistent skill storage for self-improving capabilities
 
 ### 🎛️ Control Interface (Mission Control)
 - Next.js 15 + React 19 dashboard with modern UI
 - Real-time data visualization and analytics
+- Monitor agent memory, skills, and learning progress
+- View and manage created skills from the self-improving loop
 - Modular architecture for easy extension
 - Lucide icons for consistent, lightweight UI
 - Responsive design for desktop and mobile access
@@ -36,6 +40,7 @@ A sophisticated, secure, and fully-understood personal AI agent system featuring
 - Comprehensive logging and monitoring
 - Extensible tool system for custom functionality
 - Environment-based configuration for different deployment targets
+- Skill-based extensibility for AI agent capabilities
 
 ## 🏗️ Architecture
 
@@ -52,6 +57,11 @@ graph TD
     I --> J[Mission Control Dashboard]
     J -->|API Requests| K[Backend API Routes]
     K --> C
+    C --> L[Self-Improving Loop]
+    L --> M[Skill Creation System]
+    L --> N[Experience Analysis]
+    M --> O[skills/ Directory]
+    N --> C
 ```
 
 ### Core Components
@@ -62,6 +72,7 @@ graph TD
 5. **Mission Control** (`mission-control/`) - Next.js dashboard for monitoring and control
 6. **Configuration** (`src/config.ts`) - Centralized environment-based configuration
 7. **Heartbeat** (`src/heartbeat.ts`) - System health monitoring and scheduling
+8. **Self-Improving Loop** (`src/agent.ts`, `src/skills/`, `src/tools/skill-*`) - Autonomous skill creation from experience
 
 ## 🚀 Getting Started
 
@@ -116,6 +127,7 @@ graph TD
 - Start chatting with your agent via Telegram
 - Use Mission Control dashboard at `http://localhost:3001` to:
   - Monitor agent activity and memory
+  - View and manage skills created by the self-improving loop
   - Configure AI provider settings
   - Manage connected tools and services
   - View analytics and usage statistics
@@ -124,7 +136,8 @@ graph TD
 1. Create new tools in `src/tools/` following the existing pattern
 2. Register tools in the AI agent's tool registry
 3. Access tools via natural language commands or direct API calls
-4. Deploy updates via `docker-compose up --build --detach`
+4. Leverage the self-improving loop to autonomously create new skills from experience
+5. Deploy updates via `docker-compose up --build --detach`
 
 ## 🔧 Configuration
 
@@ -161,6 +174,7 @@ services:
       - NODE_ENV=production
     volumes:
       - ./data:/app/data  # Persistent storage
+      - ./skills:/app/skills  # Persistent skill storage for self-improving loop
 ```
 
 ### Manual Deployment
@@ -168,6 +182,7 @@ services:
 2. Start the bot: `npm start`
 3. Start Mission Control: `cd mission-control && npm run start`
 4. Ensure environment variables are set appropriately
+5. Ensure the `skills/` directory exists for persistent skill storage
 
 ## 🧩 Extending the Framework
 

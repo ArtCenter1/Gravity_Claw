@@ -1,0 +1,2 @@
+{"time": "2026-04-06 10:34:37.586722+08:00", "level": "INFO", "message": "Starting Claude Code Proxy...", "module": "api.app", "function": "lifespan", "line": 45}
+{"time": "2026-04-06 10:34:37.629736+08:00", "level": "INFO", "message": "No Discord bot token configured, skipping platform setup", "module": "messaging.platforms.factory", "function": "create_messaging_platform", "line": 43}

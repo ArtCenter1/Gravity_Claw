@@ -25,9 +25,23 @@ export async function GET() {
             settingsObj[s.key] = s.value;
         });
 
+        // Check if the bot is actually online (via the new health check port)
+        let agentStatus = 'offline';
+        try {
+            const healthRes = await fetch('http://bot:8080/health', { signal: AbortSignal.timeout(1000) });
+            if (healthRes.ok) {
+                const healthData = await healthRes.json();
+                if (healthData.status === 'online') agentStatus = 'online';
+            }
+        } catch (e) {
+            // Bot is unreachable or not running health check
+            console.log('[Status Check] Bot is unreachable');
+        }
+
         return NextResponse.json({
             personality: soulContent,
             settings: settingsObj,
+            agentStatus: agentStatus
         });
     } catch (error) {
         console.error('Error fetching settings:', error);
