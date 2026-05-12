@@ -15,6 +15,8 @@ RUN npm install
 # Copy the rest of the application code
 COPY src/ ./src/
 COPY tsconfig.json ./
+COPY mcp_servers.json ./
+COPY skills/ ./skills/
 
 # Create data directory for volume mapping
 RUN mkdir -p .data

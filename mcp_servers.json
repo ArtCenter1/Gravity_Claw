@@ -1,5 +1,16 @@
 {
     "mcpServers": {
+        "openspace": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@hkuds/openspace-mcp",
+                "--sse",
+                "http://openspace-evolution-engine:8081/mcp",
+                "--header",
+                "Host: localhost:8081"
+            ]
+        },
         "filesystem": {
             "command": "npx",
             "args": [

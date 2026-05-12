@@ -114,7 +114,7 @@ graph TD
 
 ### Interacting with Your AI Agent
 - Start chatting with your agent via Telegram
-- Use Mission Control dashboard at `http://localhost:3000` to:
+- Use Mission Control dashboard at `http://localhost:3001` to:
   - Monitor agent activity and memory
   - Configure AI provider settings
   - Manage connected tools and services
