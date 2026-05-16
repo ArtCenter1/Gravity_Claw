@@ -11,7 +11,8 @@ import {
     Brain,
     Plug,
     Settings,
-    Activity
+    Activity,
+    Terminal
 } from 'lucide-react';
 
 const navItems = [
@@ -22,6 +23,7 @@ const navItems = [
     { href: '/brain', label: 'Second Brain', icon: Brain },
     { href: '/skills', label: 'Skills', icon: 'Zap' }, // Temporary icon, will replace
     { href: '/connections', label: 'Connections', icon: Plug },
+    { href: '/terminal', label: 'Terminal', icon: Terminal },
     { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
