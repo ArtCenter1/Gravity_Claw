@@ -10,7 +10,7 @@ import { FunctionDeclaration } from '@google/generative-ai';
 // Types
 // ============================================================================
 
-export type LLMProviderType = 'openai' | 'anthropic' | 'google' | 'gemini' | 'deepseek' | 'groq' | 'ollama' | 'openrouter' | 'failover';
+export type LLMProviderType = 'openai' | 'anthropic' | 'google' | 'gemini' | 'deepseek' | 'groq' | 'ollama' | 'openrouter' | 'failover' | 'custom';
 
 export interface LLMMessage {
     role: 'system' | 'user' | 'assistant' | 'tool';
@@ -179,6 +179,9 @@ export const PROVIDER_MODELS: Record<LLMProviderType, ProviderModelInfo[]> = {
     ],
     failover: [
         { id: 'auto', name: 'Automatic Failover', provider: 'failover', description: 'Priority based on configuration', contextWindow: 128000, supportsTools: true, supportsVision: true },
+    ],
+    custom: [
+        { id: 'gpt-4o-mini', name: 'Custom Default Model (GPT-4o-Mini)', provider: 'custom', description: 'User-defined model', contextWindow: 128000, supportsTools: true, supportsVision: true }
     ],
 };
 

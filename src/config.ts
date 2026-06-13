@@ -17,6 +17,8 @@ interface Config {
     groqApiKey?: string;
     ollamaBaseURL?: string;
     openrouterApiKey?: string;
+    customApiKey?: string;
+    customBaseUrl?: string;
 
     // Other services
     cartesiaApiKey?: string;
@@ -40,6 +42,8 @@ const rawConfig = {
     groqApiKey: process.env.GROQ_API_KEY,
     ollamaBaseURL: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
     openrouterApiKey: process.env.OPENROUTER_API_KEY,
+    customApiKey: process.env.CUSTOM_API_KEY,
+    customBaseUrl: process.env.CUSTOM_BASE_URL,
 
     // Other services
     cartesiaApiKey: process.env.CARTESIA_API_KEY,
@@ -65,6 +69,7 @@ function getProviderApiKey(provider: LLMProviderType): string | undefined {
         case 'groq': return rawConfig.groqApiKey;
         case 'ollama': return rawConfig.ollamaBaseURL; // Ollama doesn't need API key
         case 'openrouter': return rawConfig.openrouterApiKey;
+        case 'custom': return rawConfig.customApiKey || rawConfig.customBaseUrl;
         default: return undefined;
     }
 }
@@ -95,6 +100,8 @@ export const config: Config = {
     groqApiKey: rawConfig.groqApiKey,
     ollamaBaseURL: rawConfig.ollamaBaseURL,
     openrouterApiKey: rawConfig.openrouterApiKey,
+    customApiKey: rawConfig.customApiKey,
+    customBaseUrl: rawConfig.customBaseUrl,
     cartesiaApiKey: rawConfig.cartesiaApiKey,
     supabaseUrl: rawConfig.supabaseUrl,
     supabaseServiceKey: rawConfig.supabaseServiceKey,

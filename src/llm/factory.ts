@@ -107,6 +107,13 @@ export function createProvider(
         case 'openrouter':
             return new OpenRouterProvider(apiKey!, model || 'openai/gpt-4o');
 
+        case 'custom':
+            return new OpenAIProvider(
+                apiKey || 'sk-custom',
+                model || 'gpt-4o-mini',
+                config.customBaseUrl || 'http://localhost:11434/v1'
+            );
+
         case 'failover':
             return getFailoverProvider();
 
@@ -193,6 +200,7 @@ export function getConfiguredProviders(): { type: LLMProviderType; name: string;
         { type: 'groq', name: 'Groq', hasKey: !!config.groqApiKey },
         { type: 'ollama', name: 'Ollama (Local)', hasKey: true }, // Local doesn't need API key
         { type: 'openrouter', name: 'OpenRouter', hasKey: !!config.openrouterApiKey },
+        { type: 'custom', name: 'Custom API', hasKey: !!config.customApiKey || !!config.customBaseUrl },
         { type: 'failover', name: 'Model Failover', hasKey: true },
     ];
 }

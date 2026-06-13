@@ -39,6 +39,12 @@ const providers = [
         models: ['llama3', 'mistral', 'codellama'],
         description: 'Local models via Ollama'
     },
+    {
+        id: 'custom',
+        name: 'Custom API',
+        models: ['gpt-4o-mini', 'gpt-4o', 'claude-3-5-sonnet', 'gemini-1.5-pro'],
+        description: 'Custom Local or OpenAI-compatible API'
+    },
 ];
 
 export async function GET() {
