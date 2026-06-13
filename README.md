@@ -125,7 +125,7 @@ graph TD
 
 ### Interacting with Your AI Agent
 - Start chatting with your agent via Telegram
-- Use Mission Control dashboard at `http://localhost:3001` to:
+- Use Mission Control dashboard at `http://localhost:3003` to:
   - Monitor agent activity and memory
   - View and manage skills created by the self-improving loop
   - Configure AI provider settings
@@ -168,7 +168,7 @@ services:
   bot:
     build: .
     ports:
-      - "3001:3001"  # Bot API
+      - "3003:3003"  # Bot API
       - "3000:3000"  # Mission Control
     environment:
       - NODE_ENV=production

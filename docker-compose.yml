@@ -28,13 +28,13 @@ services:
     container_name: gravity-claw-ui
     restart: always
     ports:
-      - "3001:3001"
+      - "3003:3003"
     env_file:
       - .env
     volumes:
       - ./.data:/.data
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3001"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3003"]
       interval: 30s
       timeout: 10s
       retries: 3
