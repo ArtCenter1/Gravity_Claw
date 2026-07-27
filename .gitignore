@@ -10,3 +10,4 @@ dist/
 .next/
 .next-cache/
 .log
+tmp/
